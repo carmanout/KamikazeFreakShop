@@ -124,7 +124,7 @@
         <div class="container header-inner">
             <a href="#inicio" class="logo" data-nav="inicio">
                 <span class="logo-icon"><img src="img/logo.png" alt=""></span>
-                <span class="logo-text">Kamikaze<span class="logo-highlight">Freak</span>Shop</span>
+                <span class="logo-highlight">Kamikaze<span class="logo-highlight" style="color: black;">Freak</span>Shop</span>
             </a>
             <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
                 <span></span>
@@ -289,11 +289,24 @@
                     <h2 class="section-title">Magic: The Gathering</h2>
                     <p class="section-subtitle">Cartas sueltas y productos MTG. Si tenemos algo que quieras, ¡pásate por la tienda a echarle un ojo!</p>
                 </div>
+                <div style="text-align:center; margin-bottom:2rem;">
+                    <input type="text" id="mtg-search" placeholder="Buscar carta por nombre..." style="max-width:350px;width:100%;padding:0.7rem 1.2rem;border-radius:20px;border:1px solid var(--color-border);font-size:1rem;">
+                </div>
                 <div id="mtg-grid" class="cards-grid">
                     <div class="loading-state">Cargando cartas...</div>
                 </div>
+                <div id="mtg-pagination" style="display:none;justify-content:center;gap:0.5rem;margin-top:1.5rem;"></div>
                 <div id="mtg-empty" class="empty-state hidden">
                     <p>No hay cartas disponibles en este momento.</p>
+                </div>
+            </div>
+            <!-- Modal para imagen ampliada de carta MTG -->
+            <div id="mtg-modal" class="modal-evento" style="z-index:3000;display:none;align-items:center;justify-content:center;">
+                <div class="modal-content" style="max-width:420px;padding:1.5rem;display:flex;flex-direction:column;align-items:center;">
+                    <button class="modal-close" id="mtg-modal-close" aria-label="Cerrar" style="position:absolute;top:1rem;right:1rem;font-size:2rem;background:none;border:none;color:#888;cursor:pointer;">&times;</button>
+                    <img id="mtg-modal-img" src="" alt="Carta Magic" style="max-width:100%;max-height:420px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);margin-bottom:1rem;"/>
+                    <h3 id="mtg-modal-title" style="font-size:1.1rem;text-align:center;margin-bottom:0.5rem;"></h3>
+                    <p id="mtg-modal-edition" style="font-size:0.95rem;color:#2563eb;text-align:center;"></p>
                 </div>
             </div>
         </section>
@@ -325,7 +338,7 @@
     <footer class="footer">
         <div class="container footer-inner">
             <div class="footer-brand">
-                <span class="logo-text">Kamikaze<span class="logo-highlight">Freak</span>Shop</span>
+                <span class="logo-text" style="color: #9ad508 !important;">Kamikaze<span class="logo-highlight" style="color: white;">Freak</span>Shop</span>
                 <p>Tu tienda friki de confianza desde 2017.</p>
             </div>
             <div class="footer-social" style="margin-bottom: 0.5rem;display: flex;">

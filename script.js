@@ -340,52 +340,150 @@ function mostrarModalEvento(item) {
 async function renderMTG() {
     const grid = document.getElementById('mtg-grid');
     const empty = document.getElementById('mtg-empty');
+    const searchInput = document.getElementById('mtg-search');
+    const pagination = document.getElementById('mtg-pagination');
     const data = sheetData.mtg;
     if (!data) {
         grid.innerHTML = '<div class="loading-state">Cargando cartas...</div>';
+        if (pagination) pagination.style.display = 'none';
         return;
     }
-    const items = data.filter(item => (item['Nombre'] || '').toString().trim());
+
+    // Filtro por búsqueda
+    let searchTerm = '';
+    if (searchInput) searchTerm = searchInput.value.trim().toLowerCase();
+
+    let items = data.filter(item => (item['Nombre'] || '').toString().trim());
+    if (searchTerm) {
+        items = items.filter(item => (item['Nombre'] || '').toString().toLowerCase().includes(searchTerm));
+    }
+
+    // Paginación
+    const PAGE_SIZE = 18;
+    let page = 1;
+    if (renderMTG._page) page = renderMTG._page;
+    const totalPages = Math.ceil(items.length / PAGE_SIZE);
+    if (page > totalPages) page = 1;
+    renderMTG._page = page;
+
     if (items.length === 0) {
         grid.innerHTML = '';
         empty.classList.remove('hidden');
+        if (pagination) pagination.style.display = 'none';
         return;
     }
     empty.classList.add('hidden');
-    grid.innerHTML = items.map((item, idx) => {
+
+    let pagedItems = items;
+    if (items.length > PAGE_SIZE) {
+        pagedItems = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    }
+
+    function toTitleCase(str) {
+        return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
+    }
+    grid.innerHTML = pagedItems.map((item, idx) => {
         const nombre = item['Nombre'] || '';
         const edicion = (item['Edición'] || '').toString().trim();
-        const cantidad = item['Cantidad'] || '';
-        const precio = item['Precio'] || '';
         return `
-            <article class="card" data-mtg-index="${idx}">
-                <div class="card-image-wrapper" style="aspect-ratio: 0.714 / 1; background: #1a1a1a;">
-                    <div class="mtg-placeholder" id="mtg-img-${idx}">
+            <article class="card mtg-card-clickable" data-mtg-index="${(page-1)*PAGE_SIZE+idx}">
+                <div class="card-image-wrapper" style="aspect-ratio: 0.714 / 1; background: #1a1a1a;cursor:pointer;">
+                    <div class="mtg-placeholder" id="mtg-img-${(page-1)*PAGE_SIZE+idx}">
                         <span>Buscando imagen...</span>
                     </div>
                 </div>
                 <div class="card-body">
-                    <h3 class="card-title">${escapeHtml(nombre)}</h3>
-                    ${edicion ? `<p class="card-meta">📦 ${escapeHtml(edicion)}</p>` : ''}
-                    <div class="card-footer">
-                        ${cantidad ? `<span class="card-meta">Cantidad: ${cantidad}</span>` : ''}
-                        ${precio ? `<span class="card-price">${formatPrice(precio)}</span>` : ''}
-                    </div>
+                    <h3 class="card-title">${escapeHtml(toTitleCase(nombre))}</h3>
+                    ${edicion ? `<p class="card-meta">📦 ${escapeHtml(edicion.toUpperCase())}</p>` : ''}
                 </div>
             </article>
         `;
     }).join('');
+    // Modal de imagen ampliada
+    setTimeout(() => {
+        const modal = document.getElementById('mtg-modal');
+        const modalImg = document.getElementById('mtg-modal-img');
+        const modalTitle = document.getElementById('mtg-modal-title');
+        const modalEdition = document.getElementById('mtg-modal-edition');
+        const closeBtn = document.getElementById('mtg-modal-close');
+        document.querySelectorAll('.mtg-card-clickable .card-image-wrapper').forEach((imgWrapper, i) => {
+            imgWrapper.onclick = function() {
+                const idx = imgWrapper.parentElement.getAttribute('data-mtg-index');
+                const item = items[idx];
+                // Buscar la imagen real
+                let imgEl = imgWrapper.querySelector('img');
+                let imgSrc = imgEl ? imgEl.src : '';
+                if (!imgSrc) {
+                    // Si no está cargada aún, mostrar placeholder
+                    imgSrc = '';
+                }
+                modalImg.src = imgSrc;
+                modalTitle.textContent = toTitleCase(item['Nombre'] || '');
+                modalEdition.textContent = (item['Edición'] || '').toString().trim().toUpperCase();
+                modal.style.display = 'flex';
+                setTimeout(() => { modal.classList.add('open'); }, 10);
+            };
+        });
+        if (closeBtn) closeBtn.onclick = function() {
+            modal.classList.remove('open');
+            setTimeout(() => { modal.style.display = 'none'; }, 200);
+        };
+        if (modal) {
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('open');
+                    setTimeout(() => { modal.style.display = 'none'; }, 200);
+                }
+            };
+        }
+    }, 100);
+
+    // Paginación visual
+    if (pagination) {
+        if (items.length > PAGE_SIZE) {
+            pagination.style.display = 'flex';
+            let pagBtns = '';
+            if (page > 1) {
+                pagBtns += `<button class="btn btn-primary" data-page="prev">&laquo;</button>`;
+            }
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) {
+                    pagBtns += `<button class="btn${i === page ? ' btn-info' : ''}" data-page="${i}">${i}</button>`;
+                } else if (i === page - 3 || i === page + 3) {
+                    pagBtns += `<span style='padding:0 0.5rem;'>...</span>`;
+                }
+            }
+            if (page < totalPages) {
+                pagBtns += `<button class="btn btn-primary" data-page="next">&raquo;</button>`;
+            }
+            pagination.innerHTML = pagBtns;
+            Array.from(pagination.querySelectorAll('button[data-page]')).forEach(btn => {
+                btn.onclick = (e) => {
+                    let newPage = page;
+                    if (btn.dataset.page === 'prev') newPage = page - 1;
+                    else if (btn.dataset.page === 'next') newPage = page + 1;
+                    else newPage = parseInt(btn.dataset.page);
+                    renderMTG._page = newPage;
+                    renderMTG();
+                    window.scrollTo({top: document.getElementById('mtg').offsetTop - 80, behavior: 'smooth'});
+                };
+            });
+        } else {
+            pagination.style.display = 'none';
+        }
+    }
     function getScryfallImage(card) {
         if (card.image_uris) return card.image_uris.normal || card.image_uris.small || card.image_uris.large;
         if (card.card_faces && card.card_faces[0] && card.card_faces[0].image_uris)
             return card.card_faces[0].image_uris.normal || card.card_faces[0].image_uris.small || card.card_faces[0].image_uris.large;
         return null;
     }
-    for (let i = 0; i < items.length; i++) {
-        const item = items[i];
+    for (let i = 0; i < pagedItems.length; i++) {
+        const item = pagedItems[i];
         const nombre = item['Nombre'];
         const edicion = (item['Edición'] || '').toString().trim();
-        const placeholder = document.getElementById(`mtg-img-${i}`);
+        const globalIdx = (page-1)*PAGE_SIZE + i;
+        const placeholder = document.getElementById(`mtg-img-${globalIdx}`);
         if (!placeholder) continue;
         try {
             let url = `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(nombre)}`;
@@ -414,7 +512,15 @@ async function renderMTG() {
             placeholder.innerHTML = `<span>Imagen no disponible</span>`;
             placeholder.style.opacity = '0.6';
         }
-        if (i < items.length - 1) await delay(100);
+        if (i < pagedItems.length - 1) await delay(100);
+    }
+    // Si hay input de búsqueda, enfocar y añadir evento
+    if (searchInput && !searchInput._mtgSearchInit) {
+        searchInput.addEventListener('input', () => {
+            renderMTG._page = 1;
+            renderMTG();
+        });
+        searchInput._mtgSearchInit = true;
     }
 }
 
