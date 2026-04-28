@@ -15,7 +15,7 @@
     <header class="header">
         <div class="container header-inner">
             <a href="#inicio" class="logo" data-nav="inicio">
-                <span class="logo-icon">K</span>
+                <span class="logo-icon"><img src="img/logo.png" alt=""></span>
                 <span class="logo-text">Kamikaze<span class="logo-highlight">Freak</span>Shop</span>
             </a>
             <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
@@ -123,13 +123,48 @@
             </div>
         </section>
 
+        <!-- MODAL EVENTO -->
+        <div id="modal-evento" class="modal-evento">
+            <div class="modal-content">
+                <button class="modal-close" aria-label="Cerrar">&times;</button>
+                <img class="modal-img" src="" alt="" style="display:none;max-width:100%;border-radius:12px;margin-bottom:1rem;"/>
+                <h3 class="modal-title"></h3>
+                <p class="modal-fecha" style="font-weight:600;margin-bottom:0.5rem;"></p>
+                <p class="modal-tipo" style="color:var(--color-text-light);margin-bottom:1rem;"></p>
+                <p class="modal-desc" style="margin-bottom:1.5rem;"></p>
+                <a class="btn btn-primary modal-meetup" href="#" target="_blank" rel="noopener" style="display:none;">Ir a Meetup</a>
+            </div>
+        </div>
+
         <!-- JUEGOS -->
         <section id="juegos" class="page-section">
             <div class="container section-padding">
                 <div class="section-header">
                     <h2 class="section-title">Nuestros Juegos</h2>
-                    <p class="section-subtitle">Amplio catálogo de juegos de mesa, libros de rol y TCGs disponibles en tienda.</p>
+                    <p class="section-subtitle">Amplio catálogo de juegos de mesa, libros de rol y TCGs disponibles en tienda. ¡Ven a nuestra tienda a jugarlos, a comprarlos, o ambas cosas!</p>
                 </div>
+                <!-- Filtros -->
+                <form id="juegos-filtros" class="juegos-filtros" autocomplete="off" style="margin-bottom:2rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center; justify-content: center;">
+                    <label>Tipo:
+                        <select id="filtro-tipo">
+                            <option value="">Todos</option>
+                        </select>
+                    </label>
+                    <label>Stock:
+                        <select id="filtro-stock">
+                            <option value="">Todos</option>
+                            <option value="stock">En stock</option>
+                            <!-- <option value="agotado">Agotado</option> -->
+                        </select>
+                    </label>
+                    <label>Jugabilidad:
+                        <select id="filtro-jugabilidad">
+                            <option value="">Todos</option>
+                            <option value="Si">Disponible para jugar</option>
+                            <option value="No">No disponible</option>
+                        </select>
+                    </label>
+                </form>
                 <div id="juegos-grid" class="cards-grid">
                     <div class="loading-state">Cargando juegos...</div>
                 </div>
@@ -144,7 +179,7 @@
             <div class="container section-padding">
                 <div class="section-header">
                     <h2 class="section-title">Magic: The Gathering</h2>
-                    <p class="section-subtitle">Cartas sueltas y productos MTG. Imágenes cargadas directamente desde Scryfall.</p>
+                    <p class="section-subtitle">Cartas sueltas y productos MTG. Si tenemos algo que quieras, ¡pásate por la tienda a echarle un ojo!</p>
                 </div>
                 <div id="mtg-grid" class="cards-grid">
                     <div class="loading-state">Cargando cartas...</div>
@@ -185,12 +220,20 @@
                 <span class="logo-text">Kamikaze<span class="logo-highlight">Freak</span>Shop</span>
                 <p>Tu tienda friki de confianza desde 2017.</p>
             </div>
+            <div class="footer-social" style="margin-bottom: 0.5rem;display: flex;">
+                <a href="https://www.instagram.com/kamikazefreakshop/" target="_blank" rel="noopener" title="Instagram" style="margin-right: 0.5rem; vertical-align: middle;">
+                    <img src="img/Instagram.png" alt="Instagram" style="width:32px;height:32px;">
+                </a>
+                <a href="https://www.meetup.com/es-ES/juegos-magic-rol-y-mucho-mas-en-kamikaze-freak-shop/" target="_blank" rel="noopener" title="Meetup" style="vertical-align: middle;">
+                      <img src="img/Meetup.png" alt="Meetup" style="width:32px;height:32px;">
+                </a>
+            </div>
             <div class="footer-info">
                 <p>Calle Ponferrada, Madrid · <a href="tel:611694322">611 694 322</a></p>
                 <p><a href="mailto:kamikazefreakshop@gmail.com">kamikazefreakshop@gmail.com</a></p>
             </div>
         </div>
-        <div class="footer-bottom">
+        <div class="footer-bottom" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
             <p>&copy; 2026 Kamikaze Freak Shop. Todos los derechos reservados.</p>
         </div>
     </footer>

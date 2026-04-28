@@ -1,11 +1,290 @@
+/* Medalla jugabilidad */
+.badge-jugable {
+    background: rgba(59,130,246,0.12);
+    color: #2563eb;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+    padding: 0.3rem 0.9rem;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+}
+
+/* Filtros de juegos */
+.juegos-filtros {
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+.juegos-filtros label {
+    font-weight: 500;
+    color: var(--color-dark);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.juegos-filtros select {
+    padding: 0.35rem 1.2rem 0.35rem 0.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    font-size: 1rem;
+    background: #fff;
+    color: var(--color-dark);
+    margin-left: 0.5rem;
+    min-width: 120px;
+}
+@media (max-width: 600px) {
+    .juegos-filtros label {
+        font-size: 0.95rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.2rem;
+    }
+    .juegos-filtros select {
+        min-width: 100px;
+        font-size: 0.95rem;
+    }
+}
+/* =========================================
+   MODAL EVENTO MEJORADO
+   ========================================= */
+.modal-evento {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow-y: auto;
+}
+.modal-evento.open {
+    display: flex;
+}
+.modal-content {
+    background: #fff;
+    border-radius: 18px;
+    max-width: 700px;
+    width: 100%;
+    padding: 2rem 2.5rem 1.5rem 2.5rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    position: relative;
+    animation: fadeIn 0.3s;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.2s;
+    z-index: 10;
+}
+.modal-close:hover {
+    color: var(--color-danger);
+}
+.modal-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--color-dark);
+}
+.modal-fecha {
+    font-size: 1rem;
+    color: var(--color-primary-dark);
+}
+.modal-tipo {
+    font-size: 1rem;
+    color: var(--color-text-light);
+}
+.modal-desc {
+    font-size: 1.05rem;
+    color: var(--color-text);
+    margin-bottom: 1.5rem;
+    overflow-y: auto;
+    max-height: 40vh;
+    padding-right: 0.5rem;
+}
+.modal-meetup {
+    margin-top: 0.5rem;
+    width: 100%;
+    text-align: center;
+}
+.modal-evento img.modal-img {
+    max-height: 220px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    width: 100%;
+}
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+    background: #eee;
+    border-radius: 8px;
+}
+.modal-content::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 8px;
+}
+
+@media (max-width: 900px) {
+    .modal-content {
+        max-width: 98vw;
+        padding: 1.2rem 0.5rem 1rem 0.5rem;
+    }
+    .modal-title {
+        font-size: 1.2rem;
+    }
+    .modal-evento img.modal-img {
+        max-height: 140px;
+    }
+}
+
+@media (max-width: 600px) {
+    .modal-content {
+        max-width: 100vw;
+        padding: 0.7rem 0.2rem 0.7rem 0.2rem;
+        border-radius: 0;
+    }
+    .modal-title {
+        font-size: 1rem;
+    }
+    .modal-close {
+        top: 0.5rem;
+        right: 0.5rem;
+        font-size: 2.2rem;
+    }
+    .modal-desc {
+        max-height: 30vh;
+    }
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+/* =========================================
+   MODAL EVENTO
+   ========================================= */
+.modal-evento {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow-y: auto;
+}
+.modal-evento.open {
+    display: flex;
+}
+.modal-content {
+    background: #fff;
+    border-radius: 18px;
+    max-width: 420px;
+    width: 100%;
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    position: relative;
+    animation: fadeIn 0.3s;
+}
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.2s;
+    z-index: 10;
+}
+.modal-close:hover {
+    color: var(--color-danger);
+}
+.modal-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--color-dark);
+}
+.modal-fecha {
+    font-size: 1rem;
+    color: var(--color-primary-dark);
+}
+.modal-tipo {
+    font-size: 1rem;
+    color: var(--color-text-light);
+}
+.modal-desc {
+    font-size: 1.05rem;
+    color: var(--color-text);
+    margin-bottom: 1.5rem;
+}
+.modal-meetup {
+    margin-top: 0.5rem;
+    width: 100%;
+    text-align: center;
+}
+.modal-evento img.modal-img {
+    max-height: 220px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    width: 100%;
+}
+.event-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+.btn-info {
+    background: var(--color-info);
+    color: #fff;
+    border: none;
+    transition: var(--transition);
+}
+.btn-info:hover {
+    background: #2563eb;
+    color: #fff;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+@media (max-width: 600px) {
+    .modal-content {
+        max-width: 98vw;
+        padding: 1.2rem 0.5rem 1rem 0.5rem;
+    }
+    .modal-title {
+        font-size: 1.1rem;
+    }
+    .modal-evento img.modal-img {
+        max-height: 140px;
+    }
+}
 /* =========================================
    KAMIKAZE FREAK SHOP - MODERN STYLES
    ========================================= */
 
 /* CSS Variables */
 :root {
-    --color-primary: #D3EB10;
-    --color-primary-dark: #aacc00;
+    --color-primary: #9ad508;
+    --color-primary-dark: #698f08;
     --color-dark: #1a1a1a;
     --color-text: #2d2d2d;
     --color-text-light: #666666;
@@ -110,7 +389,7 @@ img {
     left: 0;
     width: 100%;
     z-index: 1000;
-    background: rgba(255,255,255,0.92);
+    background: rgba(255,255,255,1);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 5px solid var(--color-primary);
@@ -139,9 +418,9 @@ img {
 }
 
 .logo-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--color-primary);
+    width: 40px;
+    height: 40px;
+    /* background: var(--color-primary-dark); */
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -149,6 +428,7 @@ img {
     font-weight: 800;
     color: var(--color-dark);
     font-size: 1.1rem;
+    border: var(--color-primary) solid 2px;
 }
 
 .logo-highlight {
@@ -264,6 +544,7 @@ img {
 .section-header {
     text-align: center;
     margin-bottom: 3rem;
+    margin-top: 1rem;
 }
 
 .section-title {
@@ -870,4 +1151,75 @@ img {
     .feature-card {
         padding: 2rem 1.5rem;
     }
+}
+
+
+/* Filtros de juegos - Estilo mejorado */
+.juegos-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    padding: 1rem 1.5rem;
+    background: var(--color-bg-alt);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    align-items: flex-end;
+    justify-content: flex-start;
+}
+
+.juegos-filtros label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-light);
+}
+
+.juegos-filtros select {
+    padding: 0.5rem 2rem 0.5rem 1rem;
+    border-radius: 40px;
+    border: 1px solid var(--color-border);
+    font-size: 0.95rem;
+    font-weight: 500;
+    background: white url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') no-repeat right 0.75rem center;
+    background-size: 14px;
+    appearance: none;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+    min-width: 140px;
+}
+
+.juegos-filtros select:hover {
+    border-color: var(--color-primary);
+}
+
+.juegos-filtros select:focus {
+    outline: none;
+    border-color: var(--color-primary-dark);
+    box-shadow: 0 0 0 3px rgba(211, 235, 16, 0.2);
+}
+
+@media (max-width: 600px) {
+    .juegos-filtros {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    .juegos-filtros label {
+        width: 100%;
+    }
+    .juegos-filtros select {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+.footer-social a:hover{
+    scale: 1.1;
 }
