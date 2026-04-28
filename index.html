@@ -1,14 +1,122 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <!-- Codificación y viewport -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kamikaze Freak Shop - Tu tienda friki de confianza</title>
-    <meta name="description" content="Kamikaze Freak Shop, tu tienda de Juegos de Mesa y Magic The Gathering en Madrid. ¡Pasa, siéntate y diviértete!">
+    
+    <!-- Título SEO optimizado: Marca + Keywords principales + Ubicación -->
+    <title>Kamikaze Freak Shop | Juegos de Mesa y Magic The Gathering en Madrid</title>
+    
+    <!-- Meta descripción ampliada con keywords long-tail y CTA -->
+    <meta name="description" content="Kamikaze Freak Shop, tu tienda friki de confianza en Madrid. Especialistas en Juegos de Mesa, Magic The Gathering, cartas sueltas, mazos y eventos. ¡Pasa, siéntate y diviértete! Envíos a toda España.">
+    
+    <!-- Keywords meta (opcional pero útil para algunos motores) -->
+    <meta name="keywords" content="juegos de mesa Madrid, Magic The Gathering tienda, cartas Magic Madrid, tienda friki Madrid, Kamikaze Freak Shop, eventos Magic Madrid, mazos Magic, juegos de mesa España">
+    
+    <!-- Canonical para evitar contenido duplicado -->
+    <link rel="canonical" href="https://kamikazefreakshop.es/">
+    
+    <!-- Robots: indexar y seguir enlaces -->
+    <meta name="robots" content="index, follow">
+    
+    <!-- Autor y copyright -->
+    <meta name="author" content="Kamikaze Freak Shop">
+    <meta name="copyright" content="Kamikaze Freak Shop">
+    
+    <!-- Idioma -->
+    <meta http-equiv="Content-Language" content="es-ES">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="img/logo.png">
+    <link rel="apple-touch-icon" href="img/logo.png">
+    
+    <!-- Open Graph (Facebook, WhatsApp, etc.) -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://kamikazefreakshop.es/">
+    <meta property="og:title" content="Kamikaze Freak Shop | Juegos de Mesa y Magic The Gathering en Madrid">
+    <meta property="og:description" content="Tu tienda friki de confianza en Madrid. Especialistas en Juegos de Mesa, Magic The Gathering y eventos. ¡Pasa, siéntate y diviértete!">
+    <meta property="og:image" content="https://kamikazefreakshop.es/img/logo.png">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:site_name" content="Kamikaze Freak Shop">
+    
+    <!-- Twitter Cards -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://kamikazefreakshop.es/">
+    <meta name="twitter:title" content="Kamikaze Freak Shop | Juegos de Mesa y Magic The Gathering en Madrid">
+    <meta name="twitter:description" content="Tu tienda friki de confianza en Madrid. Especialistas en Juegos de Mesa, Magic The Gathering y eventos.">
+    <meta name="twitter:image" content="https://kamikazefreakshop.es/img/logo.png">
+    
+    <!-- Preconnect para optimizar carga -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    
+    <!-- Fuentes -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Hojas de estilo -->
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Schema.org JSON-LD: Tienda Local + Organización -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Kamikaze Freak Shop",
+      "image": "https://kamikazefreakshop.es/img/logo.png",
+      "url": "https://kamikazefreakshop.es/",
+      "telephone": "+34-611-694-322",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Calle Ponferrada, entre el 11 y el 15, zona peatonal",
+        "addressLocality": "Madrid",
+        "addressRegion": "Madrid",
+        "postalCode": "28029",
+        "addressCountry": "ES"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "40.4168",
+        "longitude": "-3.7038"
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          "opens": "10:00",
+          "closes": "21:00"
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": ["Saturday"],
+          "opens": "10:00",
+          "closes": "21:00"
+        }
+      ],
+      "priceRange": "€",
+      "description": "Tienda especializada en Juegos de Mesa y Magic The Gathering en Madrid. Ofrecemos cartas sueltas, mazos, sobres, eventos y un espacio para jugar.",
+      "sameAs": [
+        "https://www.meetup.com/es-es/juegos-magic-rol-y-mucho-mas-en-kamikaze-freak-shop/",
+        "https://www.instagram.com/kamikazefreakshop"
+      ]
+    }
+    </script>
+    
+    <!-- Schema.org para Productos (ejemplo base, adaptar por página) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Kamikaze Freak Shop",
+      "url": "https://kamikazefreakshop.es/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://kamikazefreakshop.es/buscar?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
 </head>
 <body>
 
@@ -225,7 +333,7 @@
                     <img src="img/Instagram.png" alt="Instagram" style="width:32px;height:32px;">
                 </a>
                 <a href="https://www.meetup.com/es-ES/juegos-magic-rol-y-mucho-mas-en-kamikaze-freak-shop/" target="_blank" rel="noopener" title="Meetup" style="vertical-align: middle;">
-                      <img src="img/Meetup.png" alt="Meetup" style="width:32px;height:32px;">
+                      <img src="img/meetup.png" alt="Meetup" style="width:32px;height:32px;">
                 </a>
             </div>
             <div class="footer-info">
