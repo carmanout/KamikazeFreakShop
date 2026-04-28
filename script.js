@@ -359,7 +359,7 @@ async function renderMTG() {
     }
 
     // Paginación
-    const PAGE_SIZE = 18;
+    const PAGE_SIZE = 12;
     let page = 1;
     if (renderMTG._page) page = renderMTG._page;
     const totalPages = Math.ceil(items.length / PAGE_SIZE);
