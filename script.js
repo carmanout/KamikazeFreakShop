@@ -65,6 +65,27 @@ function getStatusLabel(estado) {
     return estado ? estado.toString().trim() : 'Desconocido';
 }
 
+function normalizeText(str) {
+    if (!str) return '';
+    return str.toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function getEventStatusField(item) {
+    return item['Cancelado'] ? 'cancelado' : 'activo';
+}
+
+function getEventStatusBadgeClass(status) {
+    if (status === 'cancelado') return 'badge-danger';
+    if (status === 'activo') return 'badge-success';
+    return 'badge-info';
+}
+
+function getEventStatusBadgeLabel(status) {
+    if (status === 'cancelado') return 'Cancelado';
+    if (status === 'activo') return 'Activo';
+    return 'Desconocido';
+}
+
 function formatPrice(val) {
     if (!val && val !== 0) return '';
     const s = val.toString().trim();
@@ -318,31 +339,59 @@ function renderJuegos() {
 
 function renderEventos() {
     const grid = document.getElementById('eventos-grid');
-    const empty = document.getElementById('eventos-empty');
+    const cardsEmpty = document.getElementById('eventos-cards-empty');
+    const calendarContainer = document.getElementById('eventos-calendar');
+    const calendarEmpty = document.getElementById('eventos-calendar-empty');
     const data = sheetData.eventos;
     if (!data || !Array.isArray(data)) {
         grid.innerHTML = '<div class="loading-state">Cargando eventos...</div>';
+        if (calendarContainer) calendarContainer.innerHTML = '';
         return;
     }
+
     const now = new Date();
-    let items = data.filter(item => {
-        const actividad = (item['Actividad'] || '').toString().trim();
-        const finStr = item['Hora de finalización'];
-        const fin = parseSheetDate(finStr);
-        return actividad && fin && fin >= now;
-    });
-    items.sort((a, b) => {
-        const da = parseSheetDate(a['Hora de inicio']);
-        const db = parseSheetDate(b['Hora de inicio']);
-        return (da?.getTime() || 0) - (db?.getTime() || 0);
-    });
-    if (items.length === 0) {
-        grid.innerHTML = '';
-        empty.classList.remove('hidden');
-        return;
-    }
-    empty.classList.add('hidden');
-    grid.innerHTML = items.map((item, idx) => {
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekStart = new Date(today);
+    const dayOfWeek = weekStart.getDay();
+    weekStart.setDate(weekStart.getDate() + (dayOfWeek === 0 ? -6 : 1 - dayOfWeek));
+    const calendarEnd = new Date(weekStart);
+    calendarEnd.setDate(calendarEnd.getDate() + 27);
+
+    const cardEvents = data
+        .map(item => {
+            const inicio = parseSheetDate(item['Hora de inicio']);
+            const fin = parseSheetDate(item['Hora de finalización']);
+            const statusRaw = getEventStatusField(item);
+            return {
+                ...item,
+                inicio,
+                fin,
+                statusRaw,
+                statusLabel: getEventStatusBadgeLabel(statusRaw),
+                statusClass: getEventStatusBadgeClass(statusRaw)
+            };
+        })
+        .filter(item => item.inicio && item.fin && item.fin >= today)
+        .sort((a, b) => (a.inicio?.getTime() || 0) - (b.inicio?.getTime() || 0));
+
+    const calendarEvents = data
+        .map(item => {
+            const inicio = parseSheetDate(item['Hora de inicio']);
+            const fin = parseSheetDate(item['Hora de finalización']);
+            const statusRaw = getEventStatusField(item);
+            return {
+                ...item,
+                inicio,
+                fin,
+                statusRaw,
+                statusLabel: getEventStatusBadgeLabel(statusRaw),
+                statusClass: getEventStatusBadgeClass(statusRaw)
+            };
+        })
+        .filter(item => item.inicio && !item.fin && item.inicio >= weekStart && item.inicio <= calendarEnd)
+        .sort((a, b) => (a.inicio?.getTime() || 0) - (b.inicio?.getTime() || 0));
+
+    grid.innerHTML = cardEvents.length ? cardEvents.map((item, idx) => {
         const actividad = escapeHtml(item['Actividad'] || '');
         const tipo = escapeHtml(item['Tipo de actividad'] || '');
         const inicio = item['Hora de inicio'];
@@ -351,6 +400,7 @@ function renderEventos() {
         const imagen = item['URL Imagen'] || '';
         const urlInfo = item['Url Info'] || '';
         const fechaTexto = formatDateRange(inicio, fin);
+        const badge = `<span class="badge ${item.statusClass}">${item.statusLabel}</span>`;
         let descripcionCorta = descripcion;
         let showMasInfo = false;
         if (descripcion.length > 100) {
@@ -363,10 +413,13 @@ function renderEventos() {
                     ${imagen ? `<img src="${escapeHtml(imagen)}" alt="${actividad}" loading="lazy" onerror="this.style.display='none'">` : '<div class="mtg-placeholder">Sin imagen</div>'}
                 </div>
                 <div class="card-body">
-                    ${tipo ? `<span class="card-tag">${tipo}</span>` : ''}
+                    <div class="event-card-header">
+                        ${tipo ? `<span class="card-tag">${tipo}</span>` : ''}
+                        ${badge}
+                    </div>
                     <h3 class="card-title">${actividad}</h3>
                     ${fechaTexto ? `<p class="card-meta">📅 ${fechaTexto}</p>` : ''}
-                    <p class="card-text" id="desc-corta-${idx}">${descripcionCorta}</p>
+                    <p class="card-text">${descripcionCorta}</p>
                     <div class="event-buttons">
                         ${showMasInfo ? `<button class="btn btn-info btn-mas-info" data-idx="${idx}">Más información</button>` : ''}
                         ${urlInfo ? `<a class="btn btn-primary btn-meetup" href="${escapeHtml(urlInfo)}" target="_blank" rel="noopener">Ir a Meetup</a>` : ''}
@@ -374,15 +427,103 @@ function renderEventos() {
                 </div>
             </article>
         `;
-    }).join('');
-    // Delegación de eventos para los botones "Más información"
-    grid.querySelectorAll('.btn-mas-info').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const idx = btn.getAttribute('data-idx');
-            const item = items[idx];
-            mostrarModalEvento(item);
+    }).join('') : '';
+
+    cardsEmpty.classList.toggle('hidden', cardEvents.length > 0);
+
+    if (calendarContainer) {
+        if (calendarEvents.length === 0) {
+            calendarContainer.innerHTML = '';
+        } else {
+            calendarContainer.innerHTML = buildEventCalendar(calendarEvents, weekStart, 4);
+        }
+    }
+    if (calendarEmpty) calendarEmpty.classList.toggle('hidden', calendarEvents.length > 0);
+
+    if (cardEvents.length > 0) {
+        grid.querySelectorAll('.btn-mas-info').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = btn.getAttribute('data-mas-idx') || btn.getAttribute('data-idx');
+                const item = cardEvents[idx];
+                mostrarModalEvento(item);
+            });
         });
+    }
+
+    if (calendarEvents.length > 0) {
+        calendarContainer.querySelectorAll('.calendar-event-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const eventIdx = parseInt(item.getAttribute('data-event-idx'));
+                const eventItem = calendarEvents[eventIdx];
+                mostrarModalEvento(eventItem);
+            });
+        });
+    }
+}
+
+function buildEventCalendar(events, weekStart, weeks) {
+    const locale = 'es-ES';
+    const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+    let html = '';
+
+    // Header con los días de la semana
+    html += `<div class="calendar-weekdays-header">`;
+    weekdays.forEach(day => {
+        html += `<div class="calendar-weekday-label">${day}</div>`;
     });
+    html += `</div>`;
+
+    // Track meses para asignar colores
+    const monthColors = new Map();
+    const monthOrder = [];
+
+    for (let w = 0; w < weeks; w++) {
+        const weekBegin = new Date(weekStart);
+        weekBegin.setDate(weekBegin.getDate() + w * 7);
+        
+        // Detectar mes de la semana
+        const weekMonth = `${weekBegin.getFullYear()}-${weekBegin.getMonth()}`;
+        if (!monthColors.has(weekMonth)) {
+            monthOrder.push(weekMonth);
+        }
+        
+        const monthIndex = monthOrder.indexOf(weekMonth);
+        const monthColorClass = monthIndex === 0 ? 'month-current' : 
+                                monthIndex === 1 ? 'month-next' : 
+                                monthIndex === 2 ? 'month-future' : '';
+        
+        const weekLabel = weekBegin.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+        html += `<div class="calendar-week ${monthColorClass}">
+            <div class="calendar-week-title">Semana del ${weekLabel}</div>
+            <div class="calendar-days-grid">`;
+
+        for (let d = 0; d < 7; d++) {
+            const date = new Date(weekBegin);
+            date.setDate(date.getDate() + d);
+            const dayEvents = events.filter(ev => ev.inicio && ev.inicio.toDateString() === date.toDateString());
+            const dateLabel = date.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+            html += `<div class="calendar-day">
+                    <div class="calendar-day-header">
+                        <span class="calendar-day-date">${dateLabel}</span>
+                    </div>`;
+            if (dayEvents.length > 0) {
+                dayEvents.forEach(ev => {
+                    const eventIdx = events.indexOf(ev);
+                    const timeLabel = ev.inicio ? ev.inicio.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) : '';
+                    html += `<div class="calendar-event-item event-${normalizeText(ev['Tipo de actividad'] || '').toLowerCase().replace(/\s+/g, '-')}" data-event-idx="${eventIdx}">
+                            <div class="calendar-event-title">${escapeHtml(ev['Actividad'] || '')}</div>
+                            ${timeLabel ? `<div class="calendar-event-time">${timeLabel}</div>` : ''}
+                            <span class="badge ${ev.statusClass}">${ev.statusLabel}</span>
+                        </div>`;
+                });
+            } else {
+                html += `<div class="calendar-event-empty">Sin eventos</div>`;
+            }
+            html += `</div>`;
+        }
+        html += `</div></div>`;
+    }
+    return html;
 }
 
 function mostrarModalEvento(item) {
@@ -396,9 +537,13 @@ function mostrarModalEvento(item) {
     const imagen = item['URL Imagen'] || '';
     const urlInfo = item['Url Info'] || '';
     const fechaTexto = formatDateRange(inicio, fin);
+    const status = getEventStatusField(item);
+    const statusClass = getEventStatusBadgeClass(status);
+    const statusLabel = getEventStatusBadgeLabel(status);
     modal.querySelector('.modal-title').innerText = actividad;
     modal.querySelector('.modal-fecha').innerText = fechaTexto;
     modal.querySelector('.modal-tipo').innerText = tipo;
+    modal.querySelector('.modal-status').innerHTML = status ? `<span class="badge ${statusClass}">${statusLabel}</span>` : '';
     modal.querySelector('.modal-desc').innerText = descripcion;
     const imgEl = modal.querySelector('.modal-img');
     if (imagen) {

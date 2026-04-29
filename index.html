@@ -222,11 +222,24 @@
                     <h2 class="section-title">Próximos Eventos</h2>
                     <p class="section-subtitle">Descubre nuestros eventos semanales y conecta con personas que comparten tus aficiones.</p>
                 </div>
-                <div id="eventos-grid" class="cards-grid">
-                    <div class="loading-state">Cargando eventos...</div>
+                <div id="eventos-card-area">
+                    <div id="eventos-grid" class="cards-grid">
+                        <div class="loading-state">Cargando eventos...</div>
+                    </div>
+                    <div id="eventos-cards-empty" class="empty-state hidden">
+                        <p>No hay eventos con fecha completa disponibles.</p>
+                    </div>
                 </div>
-                <div id="eventos-empty" class="empty-state hidden">
-                    <p>No hay eventos programados próximamente. ¡Vuelve pronto!</p>
+
+                <div class="events-calendar-wrapper">
+                    <div class="events-section-header">
+                        <br>
+                        <h1 class="section-title" style="text-align: center;">Calendario de Kamikaze</h1>
+                    </div>
+                    <div id="eventos-calendar" class="event-calendar"></div>
+                    <div id="eventos-calendar-empty" class="empty-state hidden">
+                        <p>No hay eventos de calendario para las próximas semanas.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -238,7 +251,8 @@
                 <img class="modal-img" src="" alt="" style="display:none;max-width:100%;border-radius:12px;margin-bottom:1rem;"/>
                 <h3 class="modal-title"></h3>
                 <p class="modal-fecha" style="font-weight:600;margin-bottom:0.5rem;"></p>
-                <p class="modal-tipo" style="color:var(--color-text-light);margin-bottom:1rem;"></p>
+                <p class="modal-tipo" style="color:var(--color-text-light);margin-bottom:0.5rem;"></p>
+                <p class="modal-status" style="margin-bottom:1rem;"></p>
                 <p class="modal-desc" style="margin-bottom:1.5rem;"></p>
                 <a class="btn btn-primary modal-meetup" href="#" target="_blank" rel="noopener" style="display:none;">Ir a Meetup</a>
             </div>

@@ -345,6 +345,205 @@ body.modal-open {
     flex-wrap: wrap;
     margin-top: 1rem;
 }
+.event-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    width: 100%;
+}
+.event-card-header .card-tag {
+    margin-bottom: 0;
+}
+.event-calendar {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    border-radius: 15px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.5);
+    padding-bottom: 1.2rem;
+}
+
+.calendar-weekdays-header {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding: 1.5rem 1.5rem 0 1.5rem;
+    font-weight: 700;
+    color: var(--color-dark);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+}
+
+.calendar-weekday-label {
+    text-align: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.calendar-week {
+    padding: 1.5rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0px;
+    transition: background-color 0.3s ease;
+}
+
+.calendar-week.month-current {
+    background: rgba(144, 238, 144, 0.15);
+}
+
+.calendar-week.month-next {
+    background: rgba(255, 165, 0, 0.15);
+}
+
+.calendar-week.month-future {
+    background: rgba(255, 127, 127, 0.15);
+}
+
+.calendar-week-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-dark);
+    margin-bottom: 0.75rem;
+    display: none;
+}
+
+.calendar-days-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.calendar-day {
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-height: 150px;
+}
+
+.calendar-day-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.calendar-day-name {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: none;
+}
+
+.calendar-day-date {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-dark);
+}
+.calendar-event-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid rgba(37,99,235,0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+.calendar-event-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+.calendar-event-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-dark);
+}
+.calendar-event-time {
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+}
+.calendar-event-empty {
+    font-size: 0.8rem;
+    color: var(--color-text-light);
+    margin-top: auto;
+}
+/* Event type backgrounds */
+.calendar-event-item.event-mtg {
+    background: #7cc2ff;
+}
+.calendar-event-item.event-juegos {
+    background: #ffae74;
+}
+.calendar-event-item.event-rol {
+    background: #ff8989;
+}
+.calendar-event-item.event-tcg {
+    background: hsl(276, 100%, 81%);
+}
+.calendar-event-item.event-otro,
+.calendar-event-item.event- {
+    background: #fff;
+}
+.event-status-badge,
+.calendar-event-item .badge {
+    margin-top: 0.35rem;
+}
+
+@media (max-width: 992px) {
+    .calendar-days-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.4rem;
+    }
+    .calendar-day {
+        padding: 0.4rem;
+        min-height: 80px;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-days-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.3rem;
+    }
+    .calendar-day {
+        padding: 0.3rem;
+        min-height: 70px;
+    }
+    .calendar-event-item {
+        padding: 0.3rem 0.4rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .calendar-days-grid {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+    }
+    .calendar-day {
+        padding: 1rem;
+        min-height: 60px;
+    }
+    .calendar-event-item {
+        padding: 0.2rem 0.3rem;
+    }
+    .calendar-event-title {
+        font-size: 0.75rem;
+    }
+    .calendar-event-time {
+        font-size: 0.7rem;
+    }
+}
+
 .btn-info {
     background: var(--color-info);
     color: #fff;
