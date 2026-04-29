@@ -912,22 +912,22 @@ img {
 }
 
 @media (max-width: 1200px) {
-    #mtg-grid..cards-grid {
+    #mtg-grid.cards-grid {
         grid-template-columns: repeat(4, 1fr);
     }
 }
 @media (max-width: 900px) {
-    #mtg-grid..cards-grid {
+    #mtg-grid.cards-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 @media (max-width: 700px) {
-    #mtg-grid..cards-grid {
+    #mtg-grid.cards-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 @media (max-width: 480px) {
-    #mtg-grid..cards-grid {
+    #mtg-grid.cards-grid {
         grid-template-columns: 1fr;
     }
 }
