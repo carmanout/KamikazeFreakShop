@@ -252,7 +252,11 @@
                     <p class="section-subtitle">Amplio catálogo de juegos de mesa, libros de rol y TCGs disponibles en tienda. ¡Ven a nuestra tienda a jugarlos, a comprarlos, o ambas cosas!</p>
                 </div>
                 <!-- Filtros -->
-                <form id="juegos-filtros" class="juegos-filtros" autocomplete="off" style="margin-bottom:2rem;display:flex;flex-wrap:wrap;gap:1rem;align-items:center; justify-content: center;">
+                <form id="juegos-filtros" class="juegos-filtros" autocomplete="off">
+                    <div class="search-container">
+                        <input type="text" id="filtro-busqueda" placeholder="Buscar por nombre..." class="search-input">
+                        <button type="button" class="clear-search" id="clear-search" style="display:none;" aria-label="Limpiar búsqueda">×</button>
+                    </div>
                     <label>Tipo:
                         <select id="filtro-tipo">
                             <option value="">Todos</option>
@@ -276,6 +280,7 @@
                 <div id="juegos-grid" class="cards-grid">
                     <div class="loading-state">Cargando juegos...</div>
                 </div>
+                <div id="juegos-paginacion" class="pagination"></div>
                 <div id="juegos-empty" class="empty-state hidden">
                     <p>No hay juegos disponibles en este momento.</p>
                 </div>
@@ -290,12 +295,14 @@
                     <p class="section-subtitle">Cartas sueltas y productos MTG. Si tenemos algo que quieras, ¡pásate por la tienda a echarle un ojo!</p>
                 </div>
                 <div style="text-align:center; margin-bottom:2rem;">
-                    <input type="text" id="mtg-search" placeholder="Buscar carta por nombre..." style="max-width:350px;width:100%;padding:0.7rem 1.2rem;border-radius:20px;border:1px solid var(--color-border);font-size:1rem;">
+                    <div class="search-container">
+                        <input type="text" id="mtg-search" placeholder="Buscar carta por nombre..." class="search-input">
+                    </div>
                 </div>
                 <div id="mtg-grid" class="cards-grid">
                     <div class="loading-state">Cargando cartas...</div>
                 </div>
-                <div id="mtg-pagination" style="display:none;justify-content:center;gap:0.5rem;margin-top:1.5rem;"></div>
+                <div id="mtg-pagination" class="pagination" style="display:none;"></div>
                 <div id="mtg-empty" class="empty-state hidden">
                     <p>No hay cartas disponibles en este momento.</p>
                 </div>

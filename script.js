@@ -73,7 +73,6 @@ function formatPrice(val) {
 }
 
 function escapeHtml(str) {
-    console.log('Escapando:', str);
     if (!str) return '';
     return str.replace(/[&<>]/g, function(m) {
         if (m === '&') return '&amp;';
@@ -151,14 +150,42 @@ function populateTipoFilter() {
 }
 
 function initFilters() {
+    // Agregar eventos de cambio para filtros
     const filtros = ['filtro-tipo', 'filtro-stock', 'filtro-jugabilidad'];
     filtros.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            el.addEventListener('change', () => renderJuegos());
+            el.addEventListener('change', () => {
+                renderJuegos._page = 1;
+                renderJuegos();
+            });
         }
     });
-    // También reaccionar a cambios en el filtro de tipo, pero ya se incluye arriba
+
+    // Agregar evento de búsqueda
+    const searchInput = document.getElementById('filtro-busqueda');
+    const clearBtn = document.getElementById('clear-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            renderJuegos._page = 1;
+            renderJuegos();
+            // Mostrar/ocultar botón de limpiar
+            if (clearBtn) {
+                clearBtn.style.display = searchInput.value.trim() ? 'block' : 'none';
+            }
+        });
+    }
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.focus();
+                renderJuegos._page = 1;
+                renderJuegos();
+                clearBtn.style.display = 'none';
+            }
+        });
+    }
 }
 
 /* =========================================
@@ -168,15 +195,18 @@ function initFilters() {
 function renderJuegos() {
     const grid = document.getElementById('juegos-grid');
     const empty = document.getElementById('juegos-empty');
+    const pagination = document.getElementById('juegos-paginacion');
     const data = sheetData.juegos;
     if (!data) {
         grid.innerHTML = '<div class="loading-state">Cargando juegos...</div>';
+        if (pagination) pagination.style.display = 'none';
         return;
     }
 
     const tipoFiltro = document.getElementById('filtro-tipo')?.value || '';
     const stockFiltro = document.getElementById('filtro-stock')?.value || '';
     const jugabilidadFiltro = document.getElementById('filtro-jugabilidad')?.value || '';
+    const busquedaTerm = (document.getElementById('filtro-busqueda')?.value || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
     let items = data.filter(item => {
         const nombre = (item['Nombre del elemento'] || '').toString().trim();
@@ -189,6 +219,9 @@ function renderJuegos() {
         const esAgotado = estado.includes('agotado');
         if (esAgotado) return false;
 
+        // Filtro de búsqueda por nombre
+        if (busquedaTerm && !nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(busquedaTerm)) return false;
+
         if (tipoFiltro && tipo !== tipoFiltro) return false;
         // Ocultar los no disponibles temporalmente solo si el filtro es 'en stock'
         if (stockFiltro === 'stock' && (estado.includes('no disponible') || estado.includes('temporal'))) return false;
@@ -197,14 +230,28 @@ function renderJuegos() {
         return true;
     });
 
+    // Paginación
+    const PAGE_SIZE = 12;
+    let page = 1;
+    if (renderJuegos._page) page = renderJuegos._page;
+    const totalPages = Math.ceil(items.length / PAGE_SIZE);
+    if (page > totalPages) page = 1;
+    renderJuegos._page = page;
+
     if (items.length === 0) {
         grid.innerHTML = '';
         empty.classList.remove('hidden');
+        if (pagination) pagination.style.display = 'none';
         return;
     }
     empty.classList.add('hidden');
 
-    grid.innerHTML = items.map(item => {
+    let pagedItems = items;
+    if (items.length > PAGE_SIZE) {
+        pagedItems = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    }
+
+    grid.innerHTML = pagedItems.map(item => {
         const nombre = item['Nombre del elemento'] || '';
         const tipo = item['Tipo'] || '';
         const precio = item['Precio'] || '';
@@ -232,6 +279,41 @@ function renderJuegos() {
             </article>
         `;
     }).join('');
+
+    // Paginación visual
+    if (pagination) {
+        if (items.length > PAGE_SIZE) {
+            pagination.style.display = 'flex';
+            let pagBtns = '';
+            if (page > 1) {
+                pagBtns += `<button class="btn-pagination" data-page="prev">&laquo; Anterior</button>`;
+            }
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) {
+                    pagBtns += `<button class="btn-pagination${i === page ? ' btn-pagination-active' : ''}" data-page="${i}">${i}</button>`;
+                } else if (i === page - 3 || i === page + 3) {
+                    pagBtns += `<span class="pagination-ellipsis">...</span>`;
+                }
+            }
+            if (page < totalPages) {
+                pagBtns += `<button class="btn-pagination" data-page="next">Siguiente &raquo;</button>`;
+            }
+            pagination.innerHTML = pagBtns;
+            Array.from(pagination.querySelectorAll('button[data-page]')).forEach(btn => {
+                btn.onclick = (e) => {
+                    let newPage = page;
+                    if (btn.dataset.page === 'prev') newPage = page - 1;
+                    else if (btn.dataset.page === 'next') newPage = page + 1;
+                    else newPage = parseInt(btn.dataset.page);
+                    renderJuegos._page = newPage;
+                    renderJuegos();
+                    window.scrollTo({top: document.getElementById('juegos').offsetTop - 80, behavior: 'smooth'});
+                };
+            });
+        } else {
+            pagination.style.display = 'none';
+        }
+    }
 }
 
 function renderEventos() {
@@ -444,17 +526,17 @@ async function renderMTG() {
             pagination.style.display = 'flex';
             let pagBtns = '';
             if (page > 1) {
-                pagBtns += `<button class="btn btn-primary" data-page="prev">&laquo;</button>`;
+                pagBtns += `<button class="btn-pagination" data-page="prev">&laquo;</button>`;
             }
             for (let i = 1; i <= totalPages; i++) {
                 if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) {
-                    pagBtns += `<button class="btn${i === page ? ' btn-info' : ''}" data-page="${i}">${i}</button>`;
+                    pagBtns += `<button class="btn-pagination${i === page ? ' btn-pagination-active' : ''}" data-page="${i}">${i}</button>`;
                 } else if (i === page - 3 || i === page + 3) {
-                    pagBtns += `<span style='padding:0 0.5rem;'>...</span>`;
+                    pagBtns += `<span class="pagination-ellipsis">...</span>`;
                 }
             }
             if (page < totalPages) {
-                pagBtns += `<button class="btn btn-primary" data-page="next">&raquo;</button>`;
+                pagBtns += `<button class="btn-pagination" data-page="next">&raquo;</button>`;
             }
             pagination.innerHTML = pagBtns;
             Array.from(pagination.querySelectorAll('button[data-page]')).forEach(btn => {
