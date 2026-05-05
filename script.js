@@ -105,6 +105,105 @@ function escapeHtml(str) {
     });
 }
 
+function getScryfallImage(card) {
+    if (!card || typeof card !== 'object') return null;
+    if (card.image_uris) return card.image_uris.normal || card.image_uris.small || card.image_uris.large;
+    if (card.card_faces && card.card_faces[0] && card.card_faces[0].image_uris)
+        return card.card_faces[0].image_uris.normal || card.card_faces[0].image_uris.small || card.card_faces[0].image_uris.large;
+    return null;
+}
+
+const mtgImageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const placeholder = entry.target;
+        if (placeholder.dataset.loaded) {
+            mtgImageObserver.unobserve(placeholder);
+            return;
+        }
+        placeholder.dataset.loaded = 'true';
+        const nombre = placeholder.dataset.mtgName || '';
+        const edicion = placeholder.dataset.mtgSet || '';
+        loadMtgImage(placeholder, nombre, edicion).finally(() => {
+            mtgImageObserver.unobserve(placeholder);
+        });
+    });
+}, {
+    rootMargin: '250px 0px 250px 0px',
+    threshold: 0.1
+});
+
+async function safeFetchJson(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) return null;
+        return await response.json();
+    } catch (e) {
+        return null;
+    }
+}
+
+async function fetchScryfallCardImage(nombre, edicion) {
+    if (!nombre) return null;
+    const buildUrl = (set) => {
+        let url = `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(nombre)}`;
+        if (set) url += `&set=${encodeURIComponent(set)}`;
+        return url;
+    };
+
+    const urlsToTry = [];
+    if (edicion) urlsToTry.push(buildUrl(edicion));
+    urlsToTry.push(buildUrl(''));
+
+    for (const url of urlsToTry) {
+        let card = await safeFetchJson(url);
+        if (!card) {
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            card = await safeFetchJson(proxyUrl);
+        }
+        if (card) {
+            const img = getScryfallImage(card);
+            if (img) return img;
+        }
+        await delay(80);
+    }
+    return null;
+}
+
+async function loadMtgImage(placeholder, nombre, edicion) {
+    placeholder.classList.add('loading');
+    const imgUrl = await fetchScryfallCardImage(nombre, edicion);
+    if (!imgUrl) {
+        placeholder.classList.remove('loading');
+        placeholder.classList.add('failed');
+        placeholder.innerHTML = `<span>Imagen no disponible</span>`;
+        return;
+    }
+    const imgEl = document.createElement('img');
+    imgEl.src = imgUrl;
+    imgEl.alt = nombre;
+    imgEl.loading = 'lazy';
+    imgEl.decoding = 'async';
+    imgEl.style.width = '100%';
+    imgEl.style.height = '100%';
+    imgEl.style.objectFit = 'cover';
+    imgEl.style.opacity = '0';
+    imgEl.style.transition = 'opacity 0.3s ease';
+    imgEl.className = 'mtg-card-image';
+    imgEl.onload = () => {
+        imgEl.style.opacity = '1';
+    };
+    imgEl.onerror = () => {
+        const fallbackEl = document.createElement('div');
+        fallbackEl.className = 'mtg-placeholder failed';
+        fallbackEl.style.width = '100%';
+        fallbackEl.style.height = '100%';
+        fallbackEl.innerHTML = `<span>Imagen no disponible</span>`;
+        imgEl.replaceWith(fallbackEl);
+    };
+    placeholder.replaceWith(imgEl);
+}
+
 /* =========================================
    GOOGLE SHEETS FETCH
    ========================================= */
@@ -646,7 +745,7 @@ async function renderMTG() {
     const pagination = document.getElementById('mtg-pagination');
     const data = sheetData.mtg;
     if (!data) {
-        grid.innerHTML = '<div class="loading-state">Cargando cartas...</div>';
+        grid.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>Cargando cartas...</p></div>';
         if (pagination) pagination.style.display = 'none';
         return;
     }
@@ -687,10 +786,11 @@ async function renderMTG() {
     grid.innerHTML = pagedItems.map((item, idx) => {
         const nombre = item['Nombre'] || '';
         const edicion = (item['Edición'] || '').toString().trim();
+        const globalIdx = (page-1)*PAGE_SIZE + idx;
         return `
-            <article class="card mtg-card-clickable" data-mtg-index="${(page-1)*PAGE_SIZE+idx}">
-                <div class="card-image-wrapper" style="aspect-ratio: 0.714 / 1; background: #1a1a1a;cursor:pointer;">
-                    <div class="mtg-placeholder" id="mtg-img-${(page-1)*PAGE_SIZE+idx}">
+            <article class="card mtg-card-clickable" data-mtg-index="${globalIdx}">
+                <div class="card-image-wrapper" style="aspect-ratio: 0.714 / 1; background: #1a1a1a; cursor:pointer;">
+                    <div class="mtg-placeholder" id="mtg-img-${globalIdx}" data-mtg-name="${escapeHtml(nombre)}" data-mtg-set="${escapeHtml(edicion)}">
                         <span>Buscando imagen...</span>
                     </div>
                 </div>
@@ -701,44 +801,111 @@ async function renderMTG() {
             </article>
         `;
     }).join('');
+
+    grid.querySelectorAll('.mtg-placeholder').forEach(placeholder => mtgImageObserver.observe(placeholder));
+
     // Modal de imagen ampliada
-    setTimeout(() => {
-        const modal = document.getElementById('mtg-modal');
-        const modalImg = document.getElementById('mtg-modal-img');
-        const modalTitle = document.getElementById('mtg-modal-title');
-        const modalEdition = document.getElementById('mtg-modal-edition');
-        const closeBtn = document.getElementById('mtg-modal-close');
-        document.querySelectorAll('.mtg-card-clickable .card-image-wrapper').forEach((imgWrapper, i) => {
-            imgWrapper.onclick = function() {
-                const idx = imgWrapper.parentElement.getAttribute('data-mtg-index');
-                const item = items[idx];
-                // Buscar la imagen real
-                let imgEl = imgWrapper.querySelector('img');
-                let imgSrc = imgEl ? imgEl.src : '';
-                if (!imgSrc) {
-                    // Si no está cargada aún, mostrar placeholder
-                    imgSrc = '';
-                }
-                modalImg.src = imgSrc;
-                modalTitle.textContent = toTitleCase(item['Nombre'] || '');
-                modalEdition.textContent = (item['Edición'] || '').toString().trim().toUpperCase();
-                modal.style.display = 'flex';
-                setTimeout(() => { modal.classList.add('open'); }, 10);
-            };
-        });
-        if (closeBtn) closeBtn.onclick = function() {
-            modal.classList.remove('open');
-            setTimeout(() => { modal.style.display = 'none'; }, 200);
-        };
-        if (modal) {
-            modal.onclick = function(e) {
-                if (e.target === modal) {
-                    modal.classList.remove('open');
-                    setTimeout(() => { modal.style.display = 'none'; }, 200);
-                }
-            };
+    const modal = document.getElementById('mtg-modal');
+    const modalImg = document.getElementById('mtg-modal-img');
+    const modalLoading = modal.querySelector('.modal-loading');
+    const modalLoadingText = modalLoading ? modalLoading.querySelector('p') : null;
+    const modalTitle = document.getElementById('mtg-modal-title');
+    const modalEdition = document.getElementById('mtg-modal-edition');
+    const closeBtn = document.getElementById('mtg-modal-close');
+
+    const clearModalPoll = () => {
+        if (modal._pollId) {
+            clearInterval(modal._pollId);
+            modal._pollId = null;
         }
-    }, 100);
+    };
+
+    const showModal = () => {
+        modal.style.display = 'flex';
+        setTimeout(() => { modal.classList.add('open'); }, 10);
+    };
+
+    const prepareModal = (title, edition) => {
+        modalTitle.textContent = title;
+        modalEdition.textContent = edition;
+        if (modalImg) {
+            modalImg.style.display = 'none';
+            modalImg.src = '';
+        }
+        if (modalLoading) {
+            modalLoading.classList.remove('hidden');
+            if (modalLoadingText) modalLoadingText.textContent = 'Cargando imagen...';
+        }
+    };
+
+    const completeModalWithImage = (imgEl, title, edition) => {
+        if (!modal) return;
+        if (modalImg) {
+            modalImg.src = imgEl.src;
+            modalImg.alt = title;
+            modalImg.style.display = '';
+        }
+        if (modalLoading) {
+            modalLoading.classList.add('hidden');
+        }
+        modalTitle.textContent = title;
+        modalEdition.textContent = edition;
+    };
+
+    grid.onclick = function(event) {
+        const card = event.target.closest('.mtg-card-clickable');
+        if (!card) return;
+        const index = Number(card.dataset.mtgIndex);
+        const item = items[index];
+        if (!item) return;
+        clearModalPoll();
+        const titleText = toTitleCase(item['Nombre'] || '');
+        const editionText = (item['Edición'] || '').toString().trim().toUpperCase();
+        prepareModal(titleText, editionText);
+        showModal();
+
+        const updateModalImage = () => {
+            const loadedImg = card.querySelector('img');
+            const failedPlaceholder = card.querySelector('.mtg-placeholder.failed');
+            if (loadedImg && loadedImg.complete && loadedImg.naturalWidth !== 0) {
+                completeModalWithImage(loadedImg, titleText, editionText);
+                clearModalPoll();
+            } else if (failedPlaceholder) {
+                if (modalLoadingText) modalLoadingText.textContent = 'Imagen no disponible';
+                clearModalPoll();
+            }
+        };
+
+        updateModalImage();
+        modal._pollId = setInterval(updateModalImage, 250);
+        setTimeout(() => {
+            if (modal._pollId) {
+                if (modalLoadingText) modalLoadingText.textContent = 'La imagen tarda más de lo esperado...';
+            }
+        }, 3000);
+        setTimeout(() => {
+            if (modal._pollId) {
+                const currentImg = card.querySelector('img');
+                const failedPlaceholder = card.querySelector('.mtg-placeholder.failed');
+                if (!currentImg && !failedPlaceholder) {
+                    if (modalLoadingText) modalLoadingText.textContent = 'Sigue cargando, espera un momento.';
+                }
+            }
+        }, 6500);
+    };
+    if (closeBtn) closeBtn.onclick = function() {
+        clearModalPoll();
+        modal.classList.remove('open');
+        setTimeout(() => { modal.style.display = 'none'; }, 200);
+    };
+    if (modal) {
+        modal.onclick = function(e) {
+            if (e.target === modal) {
+                modal.classList.remove('open');
+                setTimeout(() => { modal.style.display = 'none'; }, 200);
+            }
+        };
+    }
 
     // Paginación visual
     if (pagination) {
@@ -773,48 +940,6 @@ async function renderMTG() {
         } else {
             pagination.style.display = 'none';
         }
-    }
-    function getScryfallImage(card) {
-        if (card.image_uris) return card.image_uris.normal || card.image_uris.small || card.image_uris.large;
-        if (card.card_faces && card.card_faces[0] && card.card_faces[0].image_uris)
-            return card.card_faces[0].image_uris.normal || card.card_faces[0].image_uris.small || card.card_faces[0].image_uris.large;
-        return null;
-    }
-    for (let i = 0; i < pagedItems.length; i++) {
-        const item = pagedItems[i];
-        const nombre = item['Nombre'];
-        const edicion = (item['Edición'] || '').toString().trim();
-        const globalIdx = (page-1)*PAGE_SIZE + i;
-        const placeholder = document.getElementById(`mtg-img-${globalIdx}`);
-        if (!placeholder) continue;
-        try {
-            let url = `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(nombre)}`;
-            if (edicion) url += `&set=${encodeURIComponent(edicion)}`;
-            const res = await fetch(url);
-            if (!res.ok) {
-                if (edicion) {
-                    await delay(100);
-                    const fallbackUrl = `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(nombre)}`;
-                    const fallbackRes = await fetch(fallbackUrl);
-                    if (!fallbackRes.ok) throw new Error('Not found');
-                    const card = await fallbackRes.json();
-                    const img = getScryfallImage(card);
-                    if (img) placeholder.outerHTML = `<img src="${img}" alt="${nombre}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">`;
-                    else throw new Error('No image');
-                } else {
-                    throw new Error('Not found');
-                }
-            } else {
-                const card = await res.json();
-                const img = getScryfallImage(card);
-                if (img) placeholder.outerHTML = `<img src="${img}" alt="${nombre}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">`;
-                else throw new Error('No image');
-            }
-        } catch (e) {
-            placeholder.innerHTML = `<span>Imagen no disponible</span>`;
-            placeholder.style.opacity = '0.6';
-        }
-        if (i < pagedItems.length - 1) await delay(100);
     }
     // Si hay input de búsqueda, enfocar y añadir evento
     if (searchInput && !searchInput._mtgSearchInit) {
