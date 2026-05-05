@@ -6,13 +6,15 @@ const SHEET_ID = '1fttJBDVd87_8hbVKHrU_8MPnQgwjgIRi734fJrC4cPo';
 const SHEET_NAMES = {
     JUEGOS: 'Juegos',
     EVENTOS: 'Eventos',
-    MTG: 'MTG'
+    MTG: 'MTG',
+    LIBROS: 'Libros'
 };
 
 let sheetData = {
     juegos: null,
     eventos: null,
-    mtg: null
+    mtg: null,
+    libros: null
 };
 
 /* =========================================
@@ -108,12 +110,19 @@ function escapeHtml(str) {
    ========================================= */
 
 async function fetchSheet(sheetName) {
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=1&sheet=${encodeURIComponent(sheetName)}`;
     const response = await fetch(url);
     const text = await response.text();
     const match = text.match(/google\.visualization\.Query\.setResponse\((.*)\);?\s*$/s);
     if (!match) throw new Error('Formato de respuesta inesperado');
     const data = JSON.parse(match[1]);
+    
+    // Debug para Libros
+    if (sheetName === 'Libros') {
+        console.log('DEBUG fetchSheet Libros - cols:', data.table.cols.map(c => c.label || c.id));
+        console.log('DEBUG fetchSheet Libros - first row:', data.table.rows[0]);
+    }
+    
     const cols = data.table.cols.map(c => c.label || c.id || '');
     const rows = data.table.rows.map(row => {
         const obj = {};
@@ -135,19 +144,25 @@ async function fetchSheet(sheetName) {
 
 async function fetchAllSheets() {
     try {
-        const [juegos, eventos, mtg] = await Promise.all([
+        const [juegos, eventos, mtg, libros] = await Promise.all([
             fetchSheet(SHEET_NAMES.JUEGOS),
             fetchSheet(SHEET_NAMES.EVENTOS),
-            fetchSheet(SHEET_NAMES.MTG)
+            fetchSheet(SHEET_NAMES.MTG),
+            fetchSheet(SHEET_NAMES.LIBROS).catch(err => {
+                console.error('Error cargando hoja Libros:', err);
+                return [];
+            })
         ]);
         sheetData.juegos = juegos;
         sheetData.eventos = eventos;
         sheetData.mtg = mtg;
+        sheetData.libros = libros;
     } catch (err) {
         console.error('Error cargando hojas de cálculo:', err);
         document.getElementById('juegos-grid').innerHTML = '<div class="loading-state">Error al cargar los datos. Intenta recargar la página.</div>';
         document.getElementById('eventos-grid').innerHTML = '<div class="loading-state">Error al cargar los datos. Intenta recargar la página.</div>';
         document.getElementById('mtg-grid').innerHTML = '<div class="loading-state">Error al cargar los datos. Intenta recargar la página.</div>';
+        document.getElementById('libros-grid').innerHTML = '<div class="loading-state">Error al cargar los datos. Intenta recargar la página.</div>';
     }
 }
 
@@ -451,29 +466,39 @@ function renderEventos() {
     }
 
     if (calendarEvents.length > 0) {
-        calendarContainer.querySelectorAll('.calendar-event-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const eventIdx = parseInt(item.getAttribute('data-event-idx'));
-                const eventItem = calendarEvents[eventIdx];
-                mostrarModalEvento(eventItem);
-            });
+    // Listeners para vista desktop
+    calendarContainer.querySelectorAll('.calendar-desktop .calendar-event-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const eventIdx = parseInt(item.getAttribute('data-event-idx'));
+            const eventItem = calendarEvents[eventIdx];
+            mostrarModalEvento(eventItem);
         });
-    }
+    });
+    
+    // Listeners para vista móvil
+    calendarContainer.querySelectorAll('.calendar-mobile .calendar-mobile-event').forEach(item => {
+        item.addEventListener('click', () => {
+            const eventIdx = parseInt(item.getAttribute('data-event-idx'));
+            const eventItem = calendarEvents[eventIdx];
+            mostrarModalEvento(eventItem);
+        });
+    });
+}
 }
 
 function buildEventCalendar(events, weekStart, weeks) {
     const locale = 'es-ES';
     const weekdays = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
-    let html = '';
-
-    // Header con los días de la semana
-    html += `<div class="calendar-weekdays-header">`;
+    
+    // --- VISTA DESKTOP: Calendario de semanas ---
+    let desktopHTML = '';
+    
+    desktopHTML += `<div class="calendar-weekdays-header">`;
     weekdays.forEach(day => {
-        html += `<div class="calendar-weekday-label">${day}</div>`;
+        desktopHTML += `<div class="calendar-weekday-label">${day}</div>`;
     });
-    html += `</div>`;
+    desktopHTML += `</div>`;
 
-    // Track meses para asignar colores
     const monthColors = new Map();
     const monthOrder = [];
 
@@ -481,7 +506,6 @@ function buildEventCalendar(events, weekStart, weeks) {
         const weekBegin = new Date(weekStart);
         weekBegin.setDate(weekBegin.getDate() + w * 7);
         
-        // Detectar mes de la semana
         const weekMonth = `${weekBegin.getFullYear()}-${weekBegin.getMonth()}`;
         if (!monthColors.has(weekMonth)) {
             monthOrder.push(weekMonth);
@@ -493,7 +517,7 @@ function buildEventCalendar(events, weekStart, weeks) {
                                 monthIndex === 2 ? 'month-future' : '';
         
         const weekLabel = weekBegin.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
-        html += `<div class="calendar-week ${monthColorClass}">
+        desktopHTML += `<div class="calendar-week ${monthColorClass}">
             <div class="calendar-week-title">Semana del ${weekLabel}</div>
             <div class="calendar-days-grid">`;
 
@@ -502,7 +526,7 @@ function buildEventCalendar(events, weekStart, weeks) {
             date.setDate(date.getDate() + d);
             const dayEvents = events.filter(ev => ev.inicio && ev.inicio.toDateString() === date.toDateString());
             const dateLabel = date.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
-            html += `<div class="calendar-day">
+            desktopHTML += `<div class="calendar-day">
                     <div class="calendar-day-header">
                         <span class="calendar-day-date">${dateLabel}</span>
                     </div>`;
@@ -510,20 +534,71 @@ function buildEventCalendar(events, weekStart, weeks) {
                 dayEvents.forEach(ev => {
                     const eventIdx = events.indexOf(ev);
                     const timeLabel = ev.inicio ? ev.inicio.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) : '';
-                    html += `<div class="calendar-event-item event-${normalizeText(ev['Tipo de actividad'] || '').toLowerCase().replace(/\s+/g, '-')}" data-event-idx="${eventIdx}">
+                    desktopHTML += `<div class="calendar-event-item event-${normalizeText(ev['Tipo de actividad'] || '').toLowerCase().replace(/\s+/g, '-')}" data-event-idx="${eventIdx}">
                             <div class="calendar-event-title">${escapeHtml(ev['Actividad'] || '')}</div>
                             ${timeLabel ? `<div class="calendar-event-time">${timeLabel}</div>` : ''}
                             <span class="badge ${ev.statusClass}">${ev.statusLabel}</span>
                         </div>`;
                 });
             } else {
-                html += `<div class="calendar-event-empty">Sin eventos</div>`;
+                desktopHTML += `<div class="calendar-event-empty">Sin eventos</div>`;
             }
-            html += `</div>`;
+            desktopHTML += `</div>`;
         }
-        html += `</div></div>`;
+        desktopHTML += `</div></div>`;
     }
-    return html;
+
+    // --- VISTA MÓVIL: Lista cronológica por días ---
+    let mobileHTML = '';
+    
+    // Agrupar eventos por día
+    const eventsByDay = new Map();
+    events.forEach((ev, idx) => {
+        if (!ev.inicio) return;
+        const dateKey = ev.inicio.toDateString();
+        if (!eventsByDay.has(dateKey)) {
+            eventsByDay.set(dateKey, { date: ev.inicio, events: [] });
+        }
+        eventsByDay.get(dateKey).events.push({ ...ev, originalIdx: idx });
+    });
+    
+    // Ordenar días
+    const sortedDays = Array.from(eventsByDay.values()).sort((a, b) => a.date - b.date);
+    
+    sortedDays.forEach(day => {
+        const dateStr = day.date.toLocaleDateString(locale, { 
+            weekday: 'long', 
+            day: 'numeric', 
+            month: 'long' 
+        });
+        
+        mobileHTML += `<div class="calendar-mobile-day">
+            <div class="calendar-mobile-date">${dateStr}</div>
+            <div class="calendar-mobile-events">`;
+        
+        day.events.forEach(ev => {
+            const timeLabel = ev.inicio ? ev.inicio.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' }) : '';
+            const tipo = escapeHtml(ev['Tipo de actividad'] || 'Evento');
+            
+            mobileHTML += `<div class="calendar-mobile-event" data-event-idx="${ev.originalIdx}">
+                <div class="calendar-mobile-event-title">${escapeHtml(ev['Actividad'] || '')}</div>
+                ${timeLabel ? `<div class="calendar-mobile-event-time">🕐 ${timeLabel}</div>` : ''}
+                <span class="calendar-mobile-event-type event-${normalizeText(tipo).toLowerCase().replace(/\s+/g, '-')}">${tipo}</span>
+                <span class="badge ${ev.statusClass}">${ev.statusLabel}</span>
+            </div>`;
+        });
+        
+        mobileHTML += `</div></div>`;
+    });
+    
+    if (sortedDays.length === 0) {
+        mobileHTML = '<div class="empty-state"><p>No hay eventos programados.</p></div>';
+    }
+
+    return `
+        <div class="calendar-desktop">${desktopHTML}</div>
+        <div class="calendar-mobile">${mobileHTML}</div>
+    `;
 }
 
 function mostrarModalEvento(item) {
@@ -766,6 +841,7 @@ function showSection(sectionId) {
     if (sectionId === 'juegos') renderJuegos();
     else if (sectionId === 'eventos') renderEventos();
     else if (sectionId === 'mtg') renderMTG();
+    else if (sectionId === 'libros') renderLibros(); 
     history.replaceState(null, null, `#${sectionId}`);
 }
 
@@ -823,8 +899,9 @@ async function init() {
     await fetchAllSheets();
     populateTipoFilter();   // Llenar el desplegable de tipos una sola vez
     initFilters();          // Conectar los event listeners de los filtros
+    initLibrosSearch();
     const hash = window.location.hash.replace('#', '');
-    const validSections = ['inicio', 'eventos', 'juegos', 'mtg', 'conocenos'];
+    const validSections = ['inicio', 'eventos', 'juegos', 'mtg', 'libros', 'conocenos'];
     const initialSection = validSections.includes(hash) ? hash : 'inicio';
     showSection(initialSection);
 }
@@ -833,4 +910,129 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
+}
+
+
+function renderLibros() {
+    const grid = document.getElementById('libros-grid');
+    const empty = document.getElementById('libros-empty');
+    const pagination = document.getElementById('libros-paginacion');
+    const data = sheetData.libros;
+
+    if (!data || !Array.isArray(data)) {
+        grid.innerHTML = '<div class="loading-state">Cargando libros...</div>';
+        if (pagination) pagination.style.display = 'none';
+        return;
+    }
+
+    // Filtro por búsqueda
+    const searchInput = document.getElementById('libros-search');
+    let searchTerm = '';
+    if (searchInput) {
+        searchTerm = searchInput.value.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    let items = data.filter(item => {
+        if (!item || typeof item !== 'object') return false;
+        const nombre = (item['NombreLibro'] || '').toString().trim();
+        return nombre.length > 0;
+    });
+    
+    if (searchTerm) {
+        items = items.filter(item => {
+            const nombre = (item['NombreLibro'] || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const autor = (item['NombreAutor'] || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const apellido = (item['ApellidoAutor'] || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            return nombre.includes(searchTerm) || autor.includes(searchTerm) || apellido.includes(searchTerm);
+        });
+    }
+
+    // Paginación
+    const PAGE_SIZE = 15; // Más libros por página que juegos (son más compactos)
+    let page = 1;
+    if (renderLibros._page) page = renderLibros._page;
+    const totalPages = Math.ceil(items.length / PAGE_SIZE);
+    if (page > totalPages) page = 1;
+    renderLibros._page = page;
+
+    if (items.length === 0) {
+        grid.innerHTML = '';
+        empty.classList.remove('hidden');
+        if (pagination) pagination.style.display = 'none';
+        return;
+    }
+    empty.classList.add('hidden');
+
+    let pagedItems = items;
+    if (items.length > PAGE_SIZE) {
+        pagedItems = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+    }
+
+    grid.innerHTML = pagedItems.map(item => {
+        const nombre = item['NombreLibro'] || '';
+        const nombreAutor = item['NombreAutor'] || '';
+        const apellidoAutor = item['ApellidoAutor'] || '';
+        const imagen = item['URLIMG'] || '';
+        
+        const autorCompleto = [nombreAutor, apellidoAutor].filter(Boolean).join(' ');
+
+        const imagenHTML = imagen 
+            ? `<div class="card-image-wrapper"><img src="${escapeHtml(imagen)}" alt="${escapeHtml(nombre)}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\'mtg-placeholder\\'>Sin imagen</div>';"></div>`
+            : `<div class="card-image-wrapper"><div class="mtg-placeholder">Sin imagen</div></div>`;
+
+        return `
+            <article class="card">
+                ${imagenHTML}
+                <div class="card-body">
+                    <h3 class="card-title">${escapeHtml(nombre)}</h3>
+                    ${autorCompleto ? `<p class="card-meta">${escapeHtml(autorCompleto)}</p>` : ''}
+                </div>
+            </article>
+        `;
+    }).join('');
+
+    // Paginación visual
+    if (pagination) {
+        if (items.length > PAGE_SIZE) {
+            pagination.style.display = 'flex';
+            let pagBtns = '';
+            if (page > 1) {
+                pagBtns += `<button class="btn-pagination" data-page="prev">&laquo; Anterior</button>`;
+            }
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || Math.abs(i - page) <= 2) {
+                    pagBtns += `<button class="btn-pagination${i === page ? ' btn-pagination-active' : ''}" data-page="${i}">${i}</button>`;
+                } else if (i === page - 3 || i === page + 3) {
+                    pagBtns += `<span class="pagination-ellipsis">...</span>`;
+                }
+            }
+            if (page < totalPages) {
+                pagBtns += `<button class="btn-pagination" data-page="next">Siguiente &raquo;</button>`;
+            }
+            pagination.innerHTML = pagBtns;
+            Array.from(pagination.querySelectorAll('button[data-page]')).forEach(btn => {
+                btn.onclick = (e) => {
+                    let newPage = page;
+                    if (btn.dataset.page === 'prev') newPage = page - 1;
+                    else if (btn.dataset.page === 'next') newPage = page + 1;
+                    else newPage = parseInt(btn.dataset.page);
+                    renderLibros._page = newPage;
+                    renderLibros();
+                    window.scrollTo({top: document.getElementById('libros').offsetTop - 80, behavior: 'smooth'});
+                };
+            });
+        } else {
+            pagination.style.display = 'none';
+        }
+    }
+}
+
+function initLibrosSearch() {
+    const searchInput = document.getElementById('libros-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            renderLibros._page = 1; // Reset a página 1 al buscar
+            renderLibros();
+        });
+    }
 }
