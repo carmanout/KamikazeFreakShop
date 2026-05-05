@@ -374,12 +374,22 @@
             <p class="section-subtitle">Nuestra selección de libros de segunda mano. ¡Pásate por la tienda a echarle un ojo!</p>
         </div>
         
-        <!-- Buscador -->
-        <div style="text-align:center; margin-bottom:2rem;">
+        <!-- Buscador y Filtros -->
+        <form class="libros-filtros" autocomplete="off">
             <div class="search-container">
                 <input type="text" id="libros-search" placeholder="Buscar por título o autor..." class="search-input">
             </div>
-        </div>
+            <label for="libros-sort-type">Ordenar por:</label>
+            <select id="libros-sort-type">
+                <option value="titulo">Título</option>
+                <option value="autor">Autor</option>
+            </select>
+            <label for="libros-sort-direction">Dirección:</label>
+            <select id="libros-sort-direction">
+                <option value="asc">Ascendente</option>
+                <option value="desc">Descendente</option>
+            </select>
+        </form>
         
         <div id="libros-grid" class="cards-grid">
             <div class="loading-state">Cargando libros...</div>

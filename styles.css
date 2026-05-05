@@ -143,6 +143,92 @@
     }
 }
 /* =========================================
+   FILTROS DE LIBROS
+   ========================================= */
+.libros-filtros {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+        background: var(--color-bg-alt);
+    padding: 1.5rem 1.8rem;
+    border-radius: 14px;
+    border: 1px solid rgba(154,213,8,0.15);
+    justify-content: center;
+    align-items: center;
+}
+.libros-filtros label {
+    font-weight: 600;
+    color: var(--color-dark);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+.libros-filtros .search-input,
+.libros-filtros select {
+    padding: 0.7rem 1.2rem;
+    border-radius: 25px;
+    border: 2px solid rgba(154,213,8,0.3);
+    font-size: 0.95rem;
+    background: #fff;
+    color: var(--color-dark);
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+.libros-filtros .search-input:focus,
+.libros-filtros select:focus {
+    outline: none;
+    border-color: #9ad508;
+    box-shadow: 0 0 0 3px rgba(154,213,8,0.15);
+    background: #fafafa;
+}
+.libros-filtros .search-input::placeholder {
+    color: #999;
+    font-style: italic;
+}
+.libros-filtros .search-input {
+    min-width: 200px;
+}
+.libros-filtros .search-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.libros-filtros .search-container::before {
+    content: "🔍";
+    position: absolute;
+    left: 0.8rem;
+    color: #999;
+    pointer-events: none;
+    font-size: 1rem;
+}
+.libros-filtros .search-container input[type="text"] {
+    padding-left: 2.5rem;
+}
+.libros-filtros select:hover {
+    border-color: rgba(154,213,8,0.5);
+}
+@media (max-width: 768px) {
+    .libros-filtros {
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 1rem;
+    }
+    .libros-filtros label {
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+    .libros-filtros .search-input,
+    .libros-filtros select {
+        min-width: 100%;
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+    }
+}
+/* =========================================
    MODAL EVENTO MEJORADO
    ========================================= */
 .modal-evento {
@@ -1911,9 +1997,9 @@ img {
 }
 
 /* Buscador de libros */
-#libros .search-container {
+/* #libros .search-container {
     margin-bottom: 1.5rem;
-}
+} */
 
 #libros .search-input {
     max-width: 400px;

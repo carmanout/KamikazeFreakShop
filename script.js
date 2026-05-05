@@ -72,6 +72,12 @@ function normalizeText(str) {
     return str.toString().trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
+function getApellido(autor) {
+    if (!autor) return '';
+    const partes = autor.trim().split(' ');
+    return partes[partes.length - 1].toLowerCase();
+}
+
 function getEventStatusField(item) {
     return item['Cancelado'] ? 'cancelado' : 'activo';
 }
@@ -1072,6 +1078,16 @@ function renderLibros() {
         });
     }
 
+    // Ordenamiento
+    const sortType = document.getElementById('libros-sort-type')?.value || 'titulo';
+    const sortDirection = document.getElementById('libros-sort-direction')?.value || 'asc';
+    const isAsc = sortDirection === 'asc';
+    if (sortType === 'titulo') {
+        items.sort((a, b) => isAsc ? (a['NombreLibro'] || '').localeCompare(b['NombreLibro'] || '') : (b['NombreLibro'] || '').localeCompare(a['NombreLibro'] || ''));
+    } else {
+        items.sort((a, b) => isAsc ? getApellido(a['NombreAutor'] || '').localeCompare(getApellido(b['NombreAutor'] || '')) : getApellido(b['NombreAutor'] || '').localeCompare(getApellido(a['NombreAutor'] || '')));
+    }
+
     // Paginación
     const PAGE_SIZE = 15; // Más libros por página que juegos (son más compactos)
     let page = 1;
@@ -1157,6 +1173,20 @@ function initLibrosSearch() {
     if (searchInput) {
         searchInput.addEventListener('input', () => {
             renderLibros._page = 1; // Reset a página 1 al buscar
+            renderLibros();
+        });
+    }
+    const sortTypeSelect = document.getElementById('libros-sort-type');
+    if (sortTypeSelect) {
+        sortTypeSelect.addEventListener('change', () => {
+            renderLibros._page = 1; // Reset a página 1 al ordenar
+            renderLibros();
+        });
+    }
+    const sortDirectionSelect = document.getElementById('libros-sort-direction');
+    if (sortDirectionSelect) {
+        sortDirectionSelect.addEventListener('change', () => {
+            renderLibros._page = 1; // Reset a página 1 al ordenar
             renderLibros();
         });
     }
