@@ -2,7 +2,7 @@
    KAMIKAZE FREAK SHOP - JAVASCRIPT (CORREGIDO)
    ========================================= */
 
-const SHEET_ID = '1fttJBDVd87_8hbVKHrU_8MPnQgwjgIRi734fJrC4cPo';
+const SHEET_ID = '1qGOW2QyCU5q9IEplIIGzHcf0cQhwazm2qYP_bpqBhM4';
 const SHEET_NAMES = {
     JUEGOS: 'Juegos',
     EVENTOS: 'Eventos',
