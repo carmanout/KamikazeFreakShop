@@ -2360,3 +2360,62 @@ img {
         font-size: 0.7rem;
     }
 }
+
+/* =========================================
+   MEJORAS BÚSQUEDA DE LIBROS
+   ========================================= */
+
+.resultados-info {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 0.75rem 1rem;
+    background: rgba(154, 213, 8, 0.08);
+    border: 1px solid rgba(154, 213, 8, 0.2);
+    border-radius: 12px;
+    color: var(--color-dark);
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.resultados-info strong {
+    color: var(--color-primary-dark);
+    font-weight: 700;
+}
+
+#libros-grid mark {
+    background: rgba(154, 213, 8, 0.35);
+    color: var(--color-dark);
+    padding: 0 2px;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
+#libros-empty strong {
+    color: var(--color-primary-dark);
+}
+
+#libros-empty p:first-child {
+    font-size: 1.1rem;
+    color: var(--color-dark);
+    font-weight: 600;
+}
+
+/* Mejorar el input de búsqueda de libros */
+#libros-search {
+    min-width: 280px;
+    max-width: 450px;
+}
+
+.libros-filtros .search-container {
+    flex: 1;
+    max-width: 450px;
+}
+
+.libros-filtros .search-container input {
+    width: 100%;
+}
+
+/* Animación suave al filtrar */
+#libros-grid {
+    transition: opacity 0.2s ease;
+}

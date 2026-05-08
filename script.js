@@ -1136,52 +1136,100 @@ function renderLibros() {
         return;
     }
 
-    // Filtro por búsqueda
+    // ── BÚSQUEDA MEJORADA ──
     const searchInput = document.getElementById('libros-search');
     let searchTerm = '';
     if (searchInput) {
-        searchTerm = searchInput.value.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        searchTerm = normalizeText(searchInput.value);
     }
 
-    let items = data.filter(item => {
-        if (!item || typeof item !== 'object') return false;
-        const nombre = (item['NombreLibro'] || '').toString().trim();
-        return nombre.length > 0;
-    });
-    
+    // Preprocesamos los items: creamos campos combinados para búsqueda
+    let items = data
+        .filter(item => item && typeof item === 'object')
+        .map(item => {
+            const nombre = (item['NombreLibro'] || '').toString().trim();
+            const nombreAutor = (item['NombreAutor'] || '').toString().trim();
+            const apellidoAutor = (item['ApellidoAutor'] || '').toString().trim();
+            
+            // Campos combinados para búsqueda
+            const autorCompleto = [nombreAutor, apellidoAutor].filter(Boolean).join(' ');
+            const autorCompletoInvertido = [apellidoAutor, nombreAutor].filter(Boolean).join(', ');
+            
+            return {
+                ...item,
+                _nombreLibro: nombre,
+                _autorCompleto: autorCompleto,
+                _autorInvertido: autorCompletoInvertido,
+                _busquedaGlobal: normalizeText([nombre, autorCompleto, apellidoAutor, nombreAutor].join(' '))
+            };
+        })
+        .filter(item => item._nombreLibro.length > 0);
+
+    // Declaramos terminos AQUÍ, fuera del if, para que esté disponible en todo el ámbito de la función
+    let terminos = [];
+
+    // Filtro por búsqueda: busca en título, autor completo, o palabras sueltas
     if (searchTerm) {
+        terminos = searchTerm.split(/\s+/).filter(t => t.length > 0);
+        
         items = items.filter(item => {
-            const nombre = (item['NombreLibro'] || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-            const autor = (item['NombreAutor'] || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-            const apellido = (item['ApellidoAutor'] || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-            return nombre.includes(searchTerm) || autor.includes(searchTerm) || apellido.includes(searchTerm);
+            // Búsqueda exacta de frase completa (prioritaria)
+            const matchExacto = item._busquedaGlobal.includes(searchTerm);
+            if (matchExacto) return true;
+            
+            // Búsqueda por términos individuales (todos deben coincidir)
+            const matchTerminos = terminos.every(term => 
+                item._busquedaGlobal.includes(term)
+            );
+            
+            return matchTerminos;
         });
     }
 
-    // Ordenamiento
+    // ── ORDENAMIENTO ──
     const sortType = document.getElementById('libros-sort-type')?.value || 'titulo';
     const sortDirection = document.getElementById('libros-sort-direction')?.value || 'asc';
     const isAsc = sortDirection === 'asc';
-    if (sortType === 'titulo') {
-        items.sort((a, b) => isAsc ? (a['NombreLibro'] || '').localeCompare(b['NombreLibro'] || '') : (b['NombreLibro'] || '').localeCompare(a['NombreLibro'] || ''));
-    } else {
-        items.sort((a, b) => isAsc ? getApellido(a['NombreAutor'] || '').localeCompare(getApellido(b['NombreAutor'] || '')) : getApellido(b['NombreAutor'] || '').localeCompare(getApellido(a['NombreAutor'] || '')));
-    }
 
-    // Paginación
-    const PAGE_SIZE = 16; // Más libros por página que juegos (son más compactos)
+    items.sort((a, b) => {
+        if (sortType === 'titulo') {
+            return isAsc 
+                ? a._nombreLibro.localeCompare(b._nombreLibro, 'es', { sensitivity: 'base' })
+                : b._nombreLibro.localeCompare(a._nombreLibro, 'es', { sensitivity: 'base' });
+        } else {
+            // Ordenar por apellido del autor (usando el campo separado si existe, o extrayéndolo)
+            const apellidoA = normalizeText(a['ApellidoAutor'] || getApellido(a['NombreAutor'] || ''));
+            const apellidoB = normalizeText(b['ApellidoAutor'] || getApellido(b['NombreAutor'] || ''));
+            return isAsc 
+                ? apellidoA.localeCompare(apellidoB, 'es', { sensitivity: 'base' })
+                : apellidoB.localeCompare(apellidoA, 'es', { sensitivity: 'base' });
+        }
+    });
+
+    // ── PAGINACIÓN ──
+    const PAGE_SIZE = 16;
     let page = 1;
     if (renderLibros._page) page = renderLibros._page;
     const totalPages = Math.ceil(items.length / PAGE_SIZE);
-    if (page > totalPages) page = 1;
+    if (page > totalPages) page = totalPages > 0 ? totalPages : 1;
+    if (page < 1) page = 1;
     renderLibros._page = page;
 
+    // Mostrar contador de resultados
+    const resultadosInfo = searchTerm 
+        ? `<div class="resultados-info">🔍 ${items.length} resultado${items.length !== 1 ? 's' : ''} para "<strong>${escapeHtml(searchInput.value.trim())}</strong>"</div>`
+        : '';
+
     if (items.length === 0) {
-        grid.innerHTML = '';
+        grid.innerHTML = resultadosInfo + '';
+        empty.innerHTML = searchTerm 
+            ? `<p>No se encontraron libros que coincidan con "<strong>${escapeHtml(searchInput.value.trim())}</strong>".</p><p style="font-size:0.9rem;color:#888;margin-top:0.5rem;">Prueba con otro término o revisa la ortografía.</p>`
+            : '<p>No hay libros disponibles en este momento.</p>';
         empty.classList.remove('hidden');
         if (pagination) pagination.style.display = 'none';
         return;
     }
+    
     empty.classList.add('hidden');
 
     let pagedItems = items;
@@ -1189,30 +1237,47 @@ function renderLibros() {
         pagedItems = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     }
 
-    grid.innerHTML = pagedItems.map(item => {
-        const nombre = item['NombreLibro'] || '';
-        const nombreAutor = item['NombreAutor'] || '';
-        const apellidoAutor = item['ApellidoAutor'] || '';
+    // Función para resaltar coincidencias en el texto
+    function resaltarCoincidencias(texto, terminosBusqueda) {
+        if (!terminosBusqueda || !terminosBusqueda.length) return escapeHtml(texto);
+        let resultado = escapeHtml(texto);
+        // Escapar caracteres especiales de regex en los términos
+        const terminosRegex = terminosBusqueda.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        const regex = new RegExp(`(${terminosRegex.join('|')})`, 'gi');
+        return resultado.replace(regex, '<mark>$1</mark>');
+    }
+
+    grid.innerHTML = resultadosInfo + pagedItems.map(item => {
+        const nombre = item._nombreLibro;
+        const autorCompleto = item._autorCompleto;
         const precio = item['Precio €'] || item['Precio'] || item['PVP'] || '';
         
-        const autorCompleto = [nombreAutor, apellidoAutor].filter(Boolean).join(' ');
+        // Resaltar coincidencias si hay búsqueda activa
+        const nombreMostrado = searchTerm 
+            ? resaltarCoincidencias(nombre, terminos)
+            : escapeHtml(nombre);
+        
+        const autorMostrado = searchTerm && autorCompleto
+            ? resaltarCoincidencias(autorCompleto, terminos)
+            : escapeHtml(autorCompleto);
+
         const detalles = [];
-        if (autorCompleto) detalles.push(autorCompleto);
-        if (precio) detalles.push(formatPrice(precio));
+        if (autorCompleto) detalles.push(autorMostrado);
+        if (precio) detalles.push(escapeHtml(formatPrice(precio)));
 
         return `
             <article class="card libro-card">
                 <div class="card-body">
                     <div class="card-header">
-                        <h3 class="card-title">${escapeHtml(nombre)}</h3>
+                        <h3 class="card-title">${nombreMostrado}</h3>
                     </div>
-                    ${detalles.length ? `<p class="card-meta">${escapeHtml(detalles.join(' • '))}</p>` : ''}
+                    ${detalles.length ? `<p class="card-meta">${detalles.join(' • ')}</p>` : ''}
                 </div>
             </article>
         `;
     }).join('');
 
-    // Paginación visual
+    // ── PAGINACIÓN VISUAL ──
     if (pagination) {
         if (items.length > PAGE_SIZE) {
             pagination.style.display = 'flex';
