@@ -149,17 +149,13 @@ async function safeFetchJson(url) {
     }
 }
 
-async function fetchScryfallCardImage(nombre, edicion) {
+async function fetchScryfallCardImage(nombre) {
     if (!nombre) return null;
-    const buildUrl = (set) => {
-        let url = `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(nombre)}`;
-        if (set) url += `&set=${encodeURIComponent(set)}`;
-        return url;
-    };
-
-    const urlsToTry = [];
-    if (edicion) urlsToTry.push(buildUrl(edicion));
-    urlsToTry.push(buildUrl(''));
+    const urlsToTry = [
+        `https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(nombre)}&lang=es`,
+        `https://api.scryfall.com/cards/search?q=${encodeURIComponent(`!"${nombre}" lang:es`)}&order=usd&dir=asc`,
+        `https://api.scryfall.com/cards/search?q=${encodeURIComponent(nombre)}&order=usd&dir=asc`
+    ];
 
     for (const url of urlsToTry) {
         let card = await safeFetchJson(url);
@@ -168,6 +164,9 @@ async function fetchScryfallCardImage(nombre, edicion) {
             card = await safeFetchJson(proxyUrl);
         }
         if (card) {
+            if (Array.isArray(card.data) && card.data.length > 0) {
+                card = card.data[0];
+            }
             const img = getScryfallImage(card);
             if (img) return img;
         }
@@ -758,11 +757,15 @@ async function renderMTG() {
 
     // Filtro por búsqueda
     let searchTerm = '';
-    if (searchInput) searchTerm = searchInput.value.trim().toLowerCase();
+    if (searchInput) searchTerm = normalizeText(searchInput.value);
 
     let items = data.filter(item => (item['Nombre'] || '').toString().trim());
     if (searchTerm) {
-        items = items.filter(item => (item['Nombre'] || '').toString().toLowerCase().includes(searchTerm));
+        items = items.filter(item => {
+            const nombre = normalizeText(item['Nombre'] || '');
+            const nombreCastellano = normalizeText(item['Castellano'] || '');
+            return nombre.includes(searchTerm) || nombreCastellano.includes(searchTerm);
+        });
     }
 
     // Paginación
@@ -791,18 +794,18 @@ async function renderMTG() {
     }
     grid.innerHTML = pagedItems.map((item, idx) => {
         const nombre = item['Nombre'] || '';
-        const edicion = (item['Edición'] || '').toString().trim();
+        const nombreCastellano = (item['Castellano'] || '').toString().trim();
         const globalIdx = (page-1)*PAGE_SIZE + idx;
         return `
             <article class="card mtg-card-clickable" data-mtg-index="${globalIdx}">
                 <div class="card-image-wrapper" style="aspect-ratio: 0.714 / 1; background: #1a1a1a; cursor:pointer;">
-                    <div class="mtg-placeholder" id="mtg-img-${globalIdx}" data-mtg-name="${escapeHtml(nombre)}" data-mtg-set="${escapeHtml(edicion)}">
+                    <div class="mtg-placeholder" id="mtg-img-${globalIdx}" data-mtg-name="${escapeHtml(nombre)}" data-mtg-set="${escapeHtml(nombreCastellano)}">
                         <span>Buscando imagen...</span>
                     </div>
                 </div>
                 <div class="card-body">
                     <h3 class="card-title">${escapeHtml(toTitleCase(nombre))}</h3>
-                    ${edicion ? `<p class="card-meta">📦 ${escapeHtml(edicion.toUpperCase())}</p>` : ''}
+                    ${nombreCastellano ? `<p class="card-meta"> ${escapeHtml(toTitleCase(nombreCastellano))}</p>` : ''}
                 </div>
             </article>
         `;
@@ -1089,7 +1092,7 @@ function renderLibros() {
     }
 
     // Paginación
-    const PAGE_SIZE = 15; // Más libros por página que juegos (son más compactos)
+    const PAGE_SIZE = 16; // Más libros por página que juegos (son más compactos)
     let page = 1;
     if (renderLibros._page) page = renderLibros._page;
     const totalPages = Math.ceil(items.length / PAGE_SIZE);
@@ -1113,20 +1116,20 @@ function renderLibros() {
         const nombre = item['NombreLibro'] || '';
         const nombreAutor = item['NombreAutor'] || '';
         const apellidoAutor = item['ApellidoAutor'] || '';
-        const imagen = item['URLIMG'] || '';
+        const precio = item['Precio €'] || item['Precio'] || item['PVP'] || '';
         
         const autorCompleto = [nombreAutor, apellidoAutor].filter(Boolean).join(' ');
-
-        const imagenHTML = imagen 
-            ? `<div class="card-image-wrapper"><img src="${escapeHtml(imagen)}" alt="${escapeHtml(nombre)}" loading="lazy" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\'mtg-placeholder\\'>Sin imagen</div>';"></div>`
-            : `<div class="card-image-wrapper"><div class="mtg-placeholder">Sin imagen</div></div>`;
+        const detalles = [];
+        if (autorCompleto) detalles.push(autorCompleto);
+        if (precio) detalles.push(formatPrice(precio));
 
         return `
-            <article class="card">
-                ${imagenHTML}
+            <article class="card libro-card">
                 <div class="card-body">
-                    <h3 class="card-title">${escapeHtml(nombre)}</h3>
-                    ${autorCompleto ? `<p class="card-meta">${escapeHtml(autorCompleto)}</p>` : ''}
+                    <div class="card-header">
+                        <h3 class="card-title">${escapeHtml(nombre)}</h3>
+                    </div>
+                    ${detalles.length ? `<p class="card-meta">${escapeHtml(detalles.join(' • '))}</p>` : ''}
                 </div>
             </article>
         `;
