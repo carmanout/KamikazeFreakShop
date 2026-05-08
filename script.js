@@ -96,10 +96,35 @@ function getEventStatusBadgeLabel(status) {
 }
 
 function formatPrice(val) {
-    if (!val && val !== 0) return '';
-    const s = val.toString().trim();
-    if (s.includes('€') || s.includes('EUR')) return s;
-    return s + '€';
+    if (val === null || val === undefined || val === '') return '';
+    let str = val.toString().trim();
+    str = str.replace(/€/g, '').replace(/EUR/gi, '').trim();
+    str = str.replace(/\s+/g, '');
+
+    if (str === '') return '';
+
+    if (str.includes(',') && str.includes('.')) {
+        const lastComma = str.lastIndexOf(',');
+        const lastDot = str.lastIndexOf('.');
+        if (lastComma > lastDot) {
+            str = str.replace(/\./g, '').replace(/,/g, '.');
+        } else {
+            str = str.replace(/,/g, '');
+        }
+    } else if (str.includes(',')) {
+        str = str.replace(/,/g, '.');
+    }
+
+    const numeric = parseFloat(str.replace(/[^0-9.-]/g, ''));
+    if (Number.isNaN(numeric)) {
+        return `${val.toString().trim()}€`;
+    }
+
+    const formatted = new Intl.NumberFormat('es-ES', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(numeric);
+    return `${formatted}€`;
 }
 
 function escapeHtml(str) {
@@ -292,7 +317,7 @@ function populateTipoFilter() {
 
 function initFilters() {
     // Agregar eventos de cambio para filtros
-    const filtros = ['filtro-tipo', 'filtro-stock', 'filtro-jugabilidad'];
+    const filtros = ['filtro-tipo', 'filtro-stock', 'filtro-ludoteca'];
     filtros.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -346,7 +371,7 @@ function renderJuegos() {
 
     const tipoFiltro = document.getElementById('filtro-tipo')?.value || '';
     const stockFiltro = document.getElementById('filtro-stock')?.value || '';
-    const jugabilidadFiltro = document.getElementById('filtro-jugabilidad')?.value || '';
+    const ludotecaFiltro = document.getElementById('filtro-ludoteca')?.value || '';
     const busquedaTerm = (document.getElementById('filtro-busqueda')?.value || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
     let items = data.filter(item => {
@@ -354,7 +379,7 @@ function renderJuegos() {
         if (!nombre) return false;
         const tipo = (item['Tipo'] || '').toString().trim();
         const estado = (item['Estado'] || '').toString().toLowerCase().trim();
-        const jugabilidad = (item['Jugabilidad'] || '').toString().trim();
+        const ludoteca = (item['Ludoteca'] || '').toString().trim();
 
         // Ocultar siempre los juegos agotados
         const esAgotado = estado.includes('agotado');
@@ -364,11 +389,10 @@ function renderJuegos() {
         if (busquedaTerm && !nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(busquedaTerm)) return false;
 
         if (tipoFiltro && tipo !== tipoFiltro) return false;
-        // Ocultar los no disponibles temporalmente solo si el filtro es 'en stock'
-            if (stockFiltro === 'novedad' && !estado.includes('novedad')) return false;
-        if (stockFiltro === 'stock' && (estado.includes('no disponible') || estado.includes('temporal') || estado.includes('agotado'))) return false;
+        if (stockFiltro === 'novedad' && !estado.includes('novedad')) return false;
+        if (stockFiltro === 'stock' && !(estado.includes('stock') || estado.includes('novedad'))) return false;
         if (stockFiltro === 'agotado' && !esAgotado) return false;
-        if (jugabilidadFiltro && jugabilidad !== jugabilidadFiltro) return false;
+        if (ludotecaFiltro && ludoteca !== ludotecaFiltro) return false;
         return true;
     });
 
@@ -400,7 +424,7 @@ function renderJuegos() {
         const estado = item['Estado'] || '';
         const descripcion = item['Descripción'] || '';
         const imagen = item['URL Imagen'] || '';
-        const jugabilidad = (item['Jugabilidad'] || '').toString().trim();
+        const ludoteca = (item['Ludoteca'] || '').toString().trim();
         const badgeClass = getStatusBadgeClass(estado);
         const badgeLabel = getStatusLabel(estado);
         const globalIdx = (page - 1) * PAGE_SIZE + idx;
@@ -412,7 +436,7 @@ function renderJuegos() {
                 <div class="card-body">
                     ${tipo ? `<span class="card-tag">${escapeHtml(tipo)}</span>` : ''}
                     <h3 class="card-title">${escapeHtml(nombre)}</h3>
-                    ${jugabilidad === 'Si' ? `<span class="badge badge-info badge-jugable">Disponible para jugar en tienda</span>` : ''}
+                    ${ludoteca === 'Si' ? `<span class="badge badge-info badge-jugable">Disponible para jugar en tienda</span>` : ''}
                     ${descripcion ? `<p class="card-text">${escapeHtml(descripcion)}</p>` : ''}
                     <div class="card-footer">
                         <span class="badge ${badgeClass}">${badgeLabel}</span>
