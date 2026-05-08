@@ -1266,6 +1266,10 @@ img {
     border-color: transparent;
 }
 
+.juego-card-clickable {
+    cursor: pointer;
+}
+
 .card-image {
     width: 100%;
     aspect-ratio: 16 / 10;
@@ -1411,6 +1415,13 @@ img {
 }
 
 .badge-info::before { background: var(--color-info); }
+
+.badge-novedad {
+    background: rgba(59,130,246,0.15);
+    color: #1d4ed8;
+}
+
+.badge-novedad::before { background: #2563eb; }
 
 /* =========================================
    ABOUT / CONÓCENOS

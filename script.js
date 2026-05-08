@@ -58,6 +58,7 @@ function getStatusBadgeClass(estado) {
     if (!estado) return 'badge-info';
     const e = estado.toString().toLowerCase().trim();
     if (e.includes('stock')) return 'badge-success';
+    if (e.includes('novedad')) return 'badge-novedad';
     if (e.includes('agotado')) return 'badge-danger';
     if (e.includes('no disponible') || e.includes('temporal')) return 'badge-warning';
     return 'badge-info';
@@ -364,7 +365,8 @@ function renderJuegos() {
 
         if (tipoFiltro && tipo !== tipoFiltro) return false;
         // Ocultar los no disponibles temporalmente solo si el filtro es 'en stock'
-        if (stockFiltro === 'stock' && (estado.includes('no disponible') || estado.includes('temporal'))) return false;
+            if (stockFiltro === 'novedad' && !estado.includes('novedad')) return false;
+        if (stockFiltro === 'stock' && (estado.includes('no disponible') || estado.includes('temporal') || estado.includes('agotado'))) return false;
         if (stockFiltro === 'agotado' && !esAgotado) return false;
         if (jugabilidadFiltro && jugabilidad !== jugabilidadFiltro) return false;
         return true;
@@ -391,7 +393,7 @@ function renderJuegos() {
         pagedItems = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     }
 
-    grid.innerHTML = pagedItems.map(item => {
+    grid.innerHTML = pagedItems.map((item, idx) => {
         const nombre = item['Nombre del elemento'] || '';
         const tipo = item['Tipo'] || '';
         const precio = item['Precio'] || '';
@@ -401,8 +403,9 @@ function renderJuegos() {
         const jugabilidad = (item['Jugabilidad'] || '').toString().trim();
         const badgeClass = getStatusBadgeClass(estado);
         const badgeLabel = getStatusLabel(estado);
+        const globalIdx = (page - 1) * PAGE_SIZE + idx;
         return `
-            <article class="card">
+            <article class="card juego-card-clickable" data-juego-index="${globalIdx}">
                 <div class="card-image-wrapper">
                     ${imagen ? `<img src="${escapeHtml(imagen)}" alt="${escapeHtml(nombre)}" loading="lazy" onerror="this.style.display='none'">` : '<div class="mtg-placeholder">Sin imagen</div>'}
                 </div>
@@ -453,6 +456,56 @@ function renderJuegos() {
         } else {
             pagination.style.display = 'none';
         }
+    }
+
+    const modal = document.getElementById('modal-juego');
+    if (modal) {
+        const modalImg = modal.querySelector('.modal-img');
+        const modalTitle = modal.querySelector('.modal-title');
+        const modalPrice = modal.querySelector('.modal-price');
+        const closeBtn = modal.querySelector('.modal-close');
+
+        grid.onclick = function(event) {
+            const card = event.target.closest('.juego-card-clickable');
+            if (!card) return;
+            const index = Number(card.dataset.juegoIndex);
+            const item = items[index];
+            if (!item) return;
+            const nombre = item['Nombre del elemento'] || '';
+            const precio = item['Precio'] || '';
+            const imagen = item['URL Imagen'] || '';
+
+            if (modalTitle) modalTitle.textContent = nombre;
+            if (modalPrice) modalPrice.textContent = precio ? formatPrice(precio) : '';
+            if (modalImg) {
+                if (imagen) {
+                    modalImg.src = imagen;
+                    modalImg.alt = nombre;
+                    modalImg.style.display = '';
+                } else {
+                    modalImg.style.display = 'none';
+                }
+            }
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('open'), 10);
+            document.body.classList.add('modal-open');
+        };
+
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                modal.classList.remove('open');
+                document.body.classList.remove('modal-open');
+                setTimeout(() => { modal.style.display = 'none'; }, 200);
+            };
+        }
+
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('open');
+                document.body.classList.remove('modal-open');
+                setTimeout(() => { modal.style.display = 'none'; }, 200);
+            }
+        };
     }
 }
 
