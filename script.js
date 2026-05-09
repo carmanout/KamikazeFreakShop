@@ -382,8 +382,11 @@ function renderJuegos() {
         const ludoteca = (item['Ludoteca'] || '').toString().trim();
 
         // Ocultar siempre los juegos agotados
-        const esAgotado = estado.includes('agotado');
-        if (esAgotado) return false;
+          const esAgotado = estado.includes('agotado');
+        if (esAgotado) {
+            const mostrarAgotadosEnLudoteca = (stockFiltro === '') && (ludoteca === 'Si');
+            if (!mostrarAgotadosEnLudoteca) return false;
+        }
 
         // Filtro de búsqueda por nombre
         if (busquedaTerm && !nombre.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').includes(busquedaTerm)) return false;
