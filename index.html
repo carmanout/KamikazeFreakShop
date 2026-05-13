@@ -241,14 +241,6 @@
                     <p class="section-subtitle">Descubre nuestros eventos semanales y conecta con personas que comparten
                         tus aficiones.</p>
                 </div>
-                <div id="eventos-card-area">
-                    <div id="eventos-grid" class="cards-grid">
-                        <div class="loading-state">Cargando eventos...</div>
-                    </div>
-                    <div id="eventos-cards-empty" class="empty-state hidden">
-                        <p>No hay eventos con fecha completa disponibles.</p>
-                    </div>
-                </div>
 
                 <div class="events-calendar-wrapper">
                     <div class="events-section-header">
@@ -258,6 +250,17 @@
                     <div id="eventos-calendar" class="event-calendar"></div>
                     <div id="eventos-calendar-empty" class="empty-state hidden">
                         <p>No hay eventos de calendario para las próximas semanas.</p>
+                    </div>
+                </div>
+
+                <div id="eventos-card-area">
+                    <br><br>
+                    <h2 class="section-title">Otros Eventos</h2>
+                    <div id="eventos-grid" class="cards-grid">
+                        <div class="loading-state">Cargando eventos...</div>
+                    </div>
+                    <div id="eventos-cards-empty" class="empty-state hidden">
+                        <p>No hay eventos con fecha completa disponibles.</p>
                     </div>
                 </div>
             </div>
@@ -325,10 +328,14 @@
             </div>
         </section>
 
-        <div id="modal-juego" class="modal-evento" style="z-index:3000;display:none;align-items:center;justify-content:center;">
-            <div class="modal-content" style="max-width:720px;padding:1.5rem;display:flex;flex-direction:column;align-items:center;">
-                <button class="modal-close" aria-label="Cerrar" style="position:absolute;top:1rem;right:1rem;font-size:2rem;background:none;border:none;color:#888;cursor:pointer;">&times;</button>
-                <img class="modal-img" src="" alt="" style="max-width:100%;max-height:70vh;object-fit:contain;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.2);margin-bottom:1rem;display:none;" />
+        <div id="modal-juego" class="modal-evento"
+            style="z-index:3000;display:none;align-items:center;justify-content:center;">
+            <div class="modal-content"
+                style="max-width:720px;padding:1.5rem;display:flex;flex-direction:column;align-items:center;">
+                <button class="modal-close" aria-label="Cerrar"
+                    style="position:absolute;top:1rem;right:1rem;font-size:2rem;background:none;border:none;color:#888;cursor:pointer;">&times;</button>
+                <img class="modal-img" src="" alt=""
+                    style="max-width:100%;max-height:70vh;object-fit:contain;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,0.2);margin-bottom:1rem;display:none;" />
                 <div style="width:100%;text-align:center;margin-bottom:1rem;">
                     <h3 class="modal-title" style="font-size:1.4rem;margin-bottom:0.5rem;color:#111;"></h3>
                     <p class="modal-price" style="font-weight:700;color:#2563eb;margin:0;font-size:1.1rem;"></p>
@@ -351,7 +358,10 @@
                     </div>
                 </div>
                 <div id="mtg-grid" class="cards-grid">
-                    <div class="loading-state"><div class="spinner"></div><p>Cargando cartas...</p></div>
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>Cargando cartas...</p>
+                    </div>
                 </div>
                 <div id="mtg-pagination" class="pagination" style="display:none;"></div>
                 <div id="mtg-empty" class="empty-state hidden">
@@ -367,7 +377,8 @@
                         style="position:absolute;top:1rem;right:1rem;font-size:2rem;background:none;border:none;color:#888;cursor:pointer;">&times;</button>
                     <img id="mtg-modal-img" src="" alt="Carta Magic"
                         style="max-width:100%;max-height:420px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.18);margin-bottom:1rem;display:none;" />
-                    <div class="modal-loading hidden" style="width:100%;max-width:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem 0;">
+                    <div class="modal-loading hidden"
+                        style="width:100%;max-width:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:2rem 0;">
                         <div class="spinner"></div>
                         <p>Cargando imagen...</p>
                     </div>
@@ -378,43 +389,45 @@
         </section>
 
 
-     <!-- LIBROS -->
-<section id="libros" class="page-section">
-    <div class="container section-padding">
-        <div class="section-header">
-            <h2 class="section-title">Libros de segunda mano</h2>
-            <p class="section-subtitle">Nuestra selección de libros de segunda mano. ¡Pásate por la tienda a echarle un ojo!</p>
-        </div>
-        
-        <!-- Buscador y Filtros -->
-        <form class="libros-filtros" autocomplete="off">
-            <div class="search-container">
-                <input type="text" id="libros-search" placeholder="Buscar por título, autor o palabra clave..." class="search-input">
+        <!-- LIBROS -->
+        <section id="libros" class="page-section">
+            <div class="container section-padding">
+                <div class="section-header">
+                    <h2 class="section-title">Libros de segunda mano</h2>
+                    <p class="section-subtitle">Nuestra selección de libros de segunda mano. ¡Pásate por la tienda a
+                        echarle un ojo!</p>
+                </div>
+
+                <!-- Buscador y Filtros -->
+                <form class="libros-filtros" autocomplete="off">
+                    <div class="search-container">
+                        <input type="text" id="libros-search" placeholder="Buscar por título, autor o palabra clave..."
+                            class="search-input">
+                    </div>
+                    <label for="libros-sort-type">Ordenar por:</label>
+                    <select id="libros-sort-type">
+                        <option value="titulo">Título</option>
+                        <option value="autor">Autor</option>
+                    </select>
+                    <label for="libros-sort-direction">Dirección:</label>
+                    <select id="libros-sort-direction">
+                        <option value="asc">Ascendente</option>
+                        <option value="desc">Descendente</option>
+                    </select>
+                </form>
+
+                <div id="libros-grid" class="cards-grid">
+                    <div class="loading-state">Cargando libros...</div>
+                </div>
+
+                <!-- PAGINACIÓN -->
+                <div id="libros-paginacion" class="pagination"></div>
+
+                <div id="libros-empty" class="empty-state hidden">
+                    <p>No hay libros disponibles en este momento.</p>
+                </div>
             </div>
-            <label for="libros-sort-type">Ordenar por:</label>
-            <select id="libros-sort-type">
-                <option value="titulo">Título</option>
-                <option value="autor">Autor</option>
-            </select>
-            <label for="libros-sort-direction">Dirección:</label>
-            <select id="libros-sort-direction">
-                <option value="asc">Ascendente</option>
-                <option value="desc">Descendente</option>
-            </select>
-        </form>
-        
-        <div id="libros-grid" class="cards-grid">
-            <div class="loading-state">Cargando libros...</div>
-        </div>
-        
-        <!-- PAGINACIÓN -->
-        <div id="libros-paginacion" class="pagination"></div>
-        
-        <div id="libros-empty" class="empty-state hidden">
-            <p>No hay libros disponibles en este momento.</p>
-        </div>
-    </div>
-</section>
+        </section>
 
         <!-- CONÓCENOS -->
         <section id="conocenos" class="page-section">
@@ -424,8 +437,8 @@
                 </div>
                 <div class="about-layout">
                     <div class="about-image">
-                        <img src="https://kamikazefreakshop.es/wp-content/uploads/2023/09/IMG_20230718_193142-1024x576.jpg"
-                            alt="Fachada de Kamikaze Freak Shop" loading="lazy">
+                        <img src="img/IMG_20230718_193142-1024x576.jpg" alt="Fachada de Kamikaze Freak Shop"
+                            loading="lazy">
                     </div>
                     <div class="about-content">
                         <h3>Kamikaze Freak Shop: pasa, siéntate y diviértete.</h3>
@@ -446,7 +459,8 @@
                             Pásate por Kamikaze Freak Shop, juega, conoce gente y, si te quedas… ya sabes que es bajo tu
                             propia responsabilidad.</p>
                         <p class="about-closing">Por eso, Kamikaze Freak Shop es tu tienda friki de confianza.
-                            <strong>¡Ven a visitarnos y forma parte de nuestra comunidad!</strong></p>
+                            <strong>¡Ven a visitarnos y forma parte de nuestra comunidad!</strong>
+                        </p>
                     </div>
                 </div>
             </div>
