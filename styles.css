@@ -582,29 +582,6 @@ body.modal-open {
     color: var(--color-text-light);
     margin-top: auto;
 }
-/* Event type backgrounds */
-.calendar-event-item.event-mtg {
-    background: #7cc2ff;
-}
-.calendar-event-item.event-juegos {
-    background: #ffae74;
-}
-.calendar-event-item.event-rol {
-    background: #ff8989;
-}
-.calendar-event-item.event-tcg {
-    background: hsl(276, 100%, 81%);
-}
-.calendar-event-item.event-otro,
-.calendar-event-item.event- {
-    background: #fff;
-}
-.event-status-badge,
-.calendar-event-item .badge {
-    margin-top: 0.35rem;
-}
-
-@media (max-width: 992px) {
     .calendar-days-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 0.4rem;
@@ -1289,15 +1266,12 @@ img {
      display: flex;
 }
 
-
 .card-image-wrapper img {
     width: 100%;
     object-fit: cover;
     transition: transform 0.5s ease, opacity 0.3s ease;
     opacity: 1;
 }
-
-
 
 .card-body {
     padding: 1rem;
@@ -1717,7 +1691,6 @@ img {
     }
 }
 
-
 /* Filtros de juegos - Estilo mejorado */
 .juegos-filtros {
     display: flex;
@@ -1929,7 +1902,6 @@ img {
     margin-bottom: 0.75rem;
 }
 
-
 /* =========================================
    SECCIÓN LIBROS - ESTILO MODERNO Y RESPONSIVE
    ========================================= */
@@ -2070,7 +2042,6 @@ img {
     }
 }
 
-
 /* =========================================
    CALENDARIO DE EVENTOS
    ========================================= */
@@ -2173,7 +2144,6 @@ img {
 }
 
 .calendar-event-item {
-         background-color: hsla(69, 100%, 76%, 0.322) !important;
     border-radius: 12px;
     padding: 0.4rem 0.5rem;
     border: 1px solid rgba(55, 56, 0, 0.486);
@@ -2207,27 +2177,125 @@ img {
     margin-top: auto;
 }
 
-/* Event type backgrounds */
+/* =========================================
+   COLORES DE EVENTOS POR TIPO (4 categorías)
+   ========================================= */
+
+/* MTG - Azul (identidad Magic, complementario al verde operativo) */
 .calendar-event-item.event-mtg {
-    background: #7cc2ff;
+    background: #DBEAFE !important;
+    border-color: #93C5FD !important;
+    border-left: 4px solid #3B82F6 !important;
+}
+.calendar-event-item.event-mtg:hover {
+    background: #BFDBFE !important;
+    border-color: #60A5FA !important;
+}
+.calendar-event-item.event-mtg .calendar-event-title {
+    color: #1E40AF !important;
+}
+.calendar-event-item.event-mtg .calendar-event-time {
+    color: #3B82F6 !important;
 }
 
-.calendar-event-item.event-juegos {
-    background: #ffae74;
+/* Juego - Naranja cálido (diversión, energía) */
+.calendar-event-item.event-juego {
+    background: #FFEDD5 !important;
+    border-color: #FDBA74 !important;
+    border-left: 4px solid #F97316 !important;
+}
+.calendar-event-item.event-juego:hover {
+    background: #FED7AA !important;
+    border-color: #FB923C !important;
+}
+.calendar-event-item.event-juego .calendar-event-title {
+    color: #9A3412 !important;
+}
+.calendar-event-item.event-juego .calendar-event-time {
+    color: #F97316 !important;
 }
 
+/* Rol - Púrpura (fantasía, imaginación) */
 .calendar-event-item.event-rol {
-    background: #ff8989;
+    background: #EDE9FE !important;
+    border-color: #C4B5FD !important;
+    border-left: 4px solid #8B5CF6 !important;
+}
+.calendar-event-item.event-rol:hover {
+    background: #DDD6FE !important;
+    border-color: #A78BFA !important;
+}
+.calendar-event-item.event-rol .calendar-event-title {
+    color: #5B21B6 !important;
+}
+.calendar-event-item.event-rol .calendar-event-time {
+    color: #8B5CF6 !important;
 }
 
-.calendar-event-item.event-tcg {
-    background: hsl(276, 100%, 81%);
+/* Evento - Rosa/Teja (eventos sociales, destacados) */
+.calendar-event-item.event-evento {
+    background: #FFE4E6 !important;
+    border-color: #FDA4AF !important;
+    border-left: 4px solid #E11D48 !important;
+}
+.calendar-event-item.event-evento:hover {
+    background: #FECDD3 !important;
+    border-color: #FB7185 !important;
+}
+.calendar-event-item.event-evento .calendar-event-title {
+    color: #881337 !important;
+}
+.calendar-event-item.event-evento .calendar-event-time {
+    color: #E11D48 !important;
 }
 
-.calendar-event-item.event-otro,
-.calendar-event-item.event- {
-    background: #fff;
+/* Sin tipo / fallback - Gris neutro */
+.calendar-event-item.event-,
+.calendar-event-item.event-undefined {
+    background: #F3F4F6 !important;
+    border-color: #D1D5DB !important;
+    border-left: 4px solid #9CA3AF !important;
 }
+.calendar-event-item.event-:hover,
+.calendar-event-item.event-undefined:hover {
+    background: #E5E7EB !important;
+}
+.calendar-event-item.event- .calendar-event-title,
+.calendar-event-item.event-undefined .calendar-event-title {
+    color: #4B5563 !important;
+}
+
+/* =========================================
+   VISTA MÓVIL - Tipos de evento
+   ========================================= */
+
+.calendar-mobile-event-type.event-mtg {
+    background: #DBEAFE;
+    color: #1E40AF;
+    border: 1px solid #93C5FD;
+}
+.calendar-mobile-event-type.event-juego {
+    background: #FFEDD5;
+    color: #9A3412;
+    border: 1px solid #FDBA74;
+}
+.calendar-mobile-event-type.event-rol {
+    background: #EDE9FE;
+    color: #5B21B6;
+    border: 1px solid #C4B5FD;
+}
+.calendar-mobile-event-type.event-evento {
+    background: #FFE4E6;
+    color: #881337;
+    border: 1px solid #FDA4AF;
+}
+.calendar-mobile-event-type.event-,
+.calendar-mobile-event-type.event-undefined {
+    background: #F3F4F6;
+    color: #4B5563;
+    border: 1px solid #D1D5DB;
+}
+
 
 /* --- VISTA MÓVIL: Lista cronológica --- */
 .calendar-mobile {
