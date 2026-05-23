@@ -2181,72 +2181,72 @@ img {
    COLORES DE EVENTOS POR TIPO (4 categorías)
    ========================================= */
 
-/* MTG - Azul (identidad Magic, complementario al verde operativo) */
+/* MTG - Rojo */
 .calendar-event-item.event-mtg {
-    background: #DBEAFE !important;
-    border-color: #93C5FD !important;
-    border-left: 4px solid #3B82F6 !important;
+    background: #fedbdb !important;
+    border-color: #fd9393 !important;
+    border-left: 4px solid #f63b3b !important;
 }
 .calendar-event-item.event-mtg:hover {
-    background: #BFDBFE !important;
-    border-color: #60A5FA !important;
+    background: #febfbf !important;
+    border-color: #fa6060 !important;
 }
 .calendar-event-item.event-mtg .calendar-event-title {
-    color: #1E40AF !important;
+    color: #af1e1e !important;
 }
 .calendar-event-item.event-mtg .calendar-event-time {
-    color: #3B82F6 !important;
+    color: #f63b3b !important;
 }
 
-/* Juego - Naranja cálido (diversión, energía) */
-.calendar-event-item.event-juego {
-    background: #FFEDD5 !important;
-    border-color: #FDBA74 !important;
-    border-left: 4px solid #F97316 !important;
+/* Juego - Verde */
+.calendar-event-item.event-juegos-de-mesa {
+    background: #e9ffd5 !important;
+    border-color: #9bfd74 !important;
+    border-left: 4px solid #7cf916 !important;
 }
-.calendar-event-item.event-juego:hover {
-    background: #FED7AA !important;
-    border-color: #FB923C !important;
+.calendar-event-item.event-juegos-de-mesa:hover {
+    background: #effeaa !important;
+    border-color: #b2fb3c !important;
 }
-.calendar-event-item.event-juego .calendar-event-title {
-    color: #9A3412 !important;
+.calendar-event-item.event-juegos-de-mesa .calendar-event-title {
+    color: #549a12 !important;
 }
-.calendar-event-item.event-juego .calendar-event-time {
-    color: #F97316 !important;
+.calendar-event-item.event-juegos-de-mesa .calendar-event-time {
+    color: #69f916 !important;
 }
 
-/* Rol - Púrpura (fantasía, imaginación) */
+/* Rol - Gris */
 .calendar-event-item.event-rol {
-    background: #EDE9FE !important;
-    border-color: #C4B5FD !important;
-    border-left: 4px solid #8B5CF6 !important;
+    background: #d3d3d3 !important;
+    border-color: #888888 !important;
+    border-left: 4px solid #575757 !important;
 }
 .calendar-event-item.event-rol:hover {
-    background: #DDD6FE !important;
-    border-color: #A78BFA !important;
+    background: #afafaf !important;
+    border-color: #4b4b4b !important;
 }
 .calendar-event-item.event-rol .calendar-event-title {
-    color: #5B21B6 !important;
+    color: #4e4e4e !important;
 }
 .calendar-event-item.event-rol .calendar-event-time {
-    color: #8B5CF6 !important;
+    color: #2b2b2b !important;
 }
 
 /* Evento - Rosa/Teja (eventos sociales, destacados) */
 .calendar-event-item.event-evento {
-    background: #FFE4E6 !important;
-    border-color: #FDA4AF !important;
-    border-left: 4px solid #E11D48 !important;
+    background: #e6e4ff !important;
+    border-color: #a5a4fd !important;
+    border-left: 4px solid #471de1 !important;
 }
 .calendar-event-item.event-evento:hover {
-    background: #FECDD3 !important;
-    border-color: #FB7185 !important;
+    background: #d2cdfe !important;
+    border-color: #717afb !important;
 }
 .calendar-event-item.event-evento .calendar-event-title {
-    color: #881337 !important;
+    color: #132888 !important;
 }
 .calendar-event-item.event-evento .calendar-event-time {
-    color: #E11D48 !important;
+    color: #1d2ae1 !important;
 }
 
 /* Sin tipo / fallback - Gris neutro */
@@ -2274,7 +2274,7 @@ img {
     color: #1E40AF;
     border: 1px solid #93C5FD;
 }
-.calendar-mobile-event-type.event-juego {
+.calendar-mobile-event-type.event-juegos-de-mesa {
     background: #FFEDD5;
     color: #9A3412;
     border: 1px solid #FDBA74;
@@ -2486,4 +2486,9 @@ img {
 /* Animación suave al filtrar */
 #libros-grid {
     transition: opacity 0.2s ease;
+}
+
+
+.leyenda::before{
+    display: none;
 }

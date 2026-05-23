@@ -621,7 +621,7 @@ function renderEventos() {
                     <p class="card-text">${descripcionCorta}</p>
                     <div class="event-buttons">
                         ${showMasInfo ? `<button class="btn btn-info btn-mas-info" data-idx="${idx}">Más información</button>` : ''}
-                        ${urlInfo ? `<a class="btn btn-primary btn-meetup" href="${escapeHtml(urlInfo)}" target="_blank" rel="noopener">Ir a Meetup</a>` : ''}
+                        ${urlInfo ? `<a class="btn btn-primary btn-meetup" href="${escapeHtml(urlInfo)}" target="_blank" rel="noopener">Apúntate en Meetup</a>` : ''}
                     </div>
                 </div>
             </article>
