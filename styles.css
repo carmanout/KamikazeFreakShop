@@ -2416,34 +2416,34 @@ img {
    ========================================= */
 
 .calendar-mobile-event-type.event-mtg {
-    background: #DBEAFE;
-    color: #1E40AF;
-    border: 1px solid #93C5FD;
+    background: #fedbdb !important;
+    color: #af1e1e !important;
+    border: 1px solid #fd9393 !important;
 }
 
 .calendar-mobile-event-type.event-juegos-de-mesa {
-    background: #FFEDD5;
-    color: #9A3412;
-    border: 1px solid #FDBA74;
+    background: #e9ffd5 !important;
+    color: #549a12 !important;
+    border: 1px solid #9bfd74 !important;
 }
 
 .calendar-mobile-event-type.event-rol {
-    background: #EDE9FE;
-    color: #5B21B6;
-    border: 1px solid #C4B5FD;
+    background: #d3d3d3 !important;
+    color: #4e4e4e !important;
+    border: 1px solid #888888 !important;
 }
 
 .calendar-mobile-event-type.event-evento {
-    background: #FFE4E6;
-    color: #881337;
-    border: 1px solid #FDA4AF;
+    background: #e6e4ff !important;
+    color: #132888 !important;
+    border: 1px solid #a5a4fd !important;
 }
 
 .calendar-mobile-event-type.event-,
 .calendar-mobile-event-type.event-undefined {
-    background: #F3F4F6;
-    color: #4B5563;
-    border: 1px solid #D1D5DB;
+    background: #F3F4F6 !important;
+    color: #4B5563 !important;
+    border: 1px solid #D1D5DB !important;
 }
 
 
@@ -2531,6 +2531,10 @@ img {
     .event-calendar {
         background: transparent;
         padding: 0;
+    }
+
+    .events-section-header {
+        display: none;
     }
 }
 
@@ -2648,4 +2652,79 @@ img {
 
 .leyenda::before {
     display: none;
+}
+
+/* =========================================
+   LEYENDA RESPONSIVA
+   ========================================= */
+
+.events-section-header h4 {
+    width: 100%;
+    max-width: 100%;
+}
+
+.events-section-header ul {
+    width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+}
+
+/* Tabla de eventos en móvil */
+@media (max-width: 768px) {
+    .events-section-header h4 {
+        display: grid !important;
+        justify-content: center !important;
+        grid-auto-flow: row !important;
+        max-width: 100% !important;
+        align-items: center !important;
+        margin: auto !important;
+        color: white !important;
+        width: 100%;
+        padding: 1rem 0;
+    }
+
+    .events-section-header ul {
+        display: grid !important;
+        justify-content: center !important;
+        grid-auto-flow: row !important;
+        grid-auto-columns: auto !important;
+        max-width: 100% !important;
+        align-items: center !important;
+        margin: auto !important;
+        width: 100%;
+        gap: 0.75rem;
+        padding: 0 1rem;
+    }
+
+    .events-section-header ul li.leyenda {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: auto !important;
+        padding: 0.75rem 1rem !important;
+        margin: 0.5rem auto !important;
+        width: auto;
+        white-space: nowrap;
+        font-size: 0.9rem;
+        border-radius: 12px;
+    }
+}
+
+@media (max-width: 520px) {
+    .events-section-header h4 {
+        font-size: 1rem;
+        padding: 0.75rem 0;
+    }
+
+    .events-section-header ul {
+        padding: 0 0.5rem;
+        gap: 0.5rem;
+    }
+
+    .events-section-header ul li.leyenda {
+        min-height: auto !important;
+        padding: 0.6rem 0.8rem !important;
+        margin: 0.4rem auto !important;
+        font-size: 0.8rem;
+    }
 }
